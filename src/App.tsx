@@ -1,75 +1,77 @@
 import { useState } from 'react';
-import { invoke } from '@tauri-apps/api/core';
-import reactLogo from './assets/react.svg';
-import './App.css';
+import {
+  Users,
+  BookUser,
+  Download,
+  Settings as SettingsIcon,
+  TriangleAlert,
+} from 'lucide-react';
+
+import { Badge, Menu, MenuOption } from './components';
+import { MenuOptions } from './enums';
+import { AllCharacters, Characters, Import, Settings } from './screens';
+
+import styles from './App.module.scss';
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState('');
-  const [name, setName] = useState('');
+  const [activeMenuOption, setActiveMenuOption] = useState<MenuOptions>(
+    MenuOptions.CHARACTERS,
+  );
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    await invoke('read_save_file', { path: name });
-    setGreetMsg(await invoke('greet', { name }));
-  }
+  const renderActiveScreen = () => {
+    switch (activeMenuOption) {
+      case MenuOptions.CHARACTERS:
+        return <Characters />;
+      case MenuOptions.ALL_CHARACTERS:
+        return <AllCharacters />;
+      case MenuOptions.IMPORT:
+        return <Import />;
+      case MenuOptions.SETTINGS:
+        return <Settings />;
+      default:
+        return null;
+    }
+  };
 
   return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
-
-      <div className="row">
-        <a
-          href="https://vite.dev"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <img
-            src="/vite.svg"
-            className="logo vite"
-            alt="Vite logo"
+    <div className={styles.layout}>
+      <nav className={styles.menu}>
+        <Menu>
+          <MenuOption
+            icon={Users}
+            label="Characters"
+            isActive={activeMenuOption === MenuOptions.CHARACTERS}
+            onClick={() => setActiveMenuOption(MenuOptions.CHARACTERS)}
           />
-        </a>
-        <a
-          href="https://tauri.app"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <img
-            src="/tauri.svg"
-            className="logo tauri"
-            alt="Tauri logo"
+          <MenuOption
+            icon={BookUser}
+            label="All Characters"
+            isActive={activeMenuOption === MenuOptions.ALL_CHARACTERS}
+            onClick={() => setActiveMenuOption(MenuOptions.ALL_CHARACTERS)}
+            rightContent={<Badge>12</Badge>}
           />
-        </a>
-        <a
-          href="https://react.dev"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <img
-            src={reactLogo}
-            className="logo react"
-            alt="React logo"
+          <MenuOption
+            icon={Download}
+            label="Import"
+            isActive={activeMenuOption === MenuOptions.IMPORT}
+            onClick={() => setActiveMenuOption(MenuOptions.IMPORT)}
           />
-        </a>
-      </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-    </main>
+          <MenuOption
+            icon={SettingsIcon}
+            label="Settings"
+            isActive={activeMenuOption === MenuOptions.SETTINGS}
+            onClick={() => setActiveMenuOption(MenuOptions.SETTINGS)}
+            rightContent={
+              <TriangleAlert
+                size={18}
+                color="var(--warning)"
+              />
+            }
+          />
+        </Menu>
+      </nav>
+      <main className={styles.main}>{renderActiveScreen()}</main>
+    </div>
   );
 }
 

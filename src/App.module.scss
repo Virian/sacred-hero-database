@@ -1,0 +1,16 @@
+.layout {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.menu {
+  width: 200px;
+  padding: 0.5rem;
+  background-color: var(--bg-sidebar);
+  border-right: 1px solid var(--border-default);
+}
+
+.main {
+  flex: 1;
+}

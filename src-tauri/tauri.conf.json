@@ -12,9 +12,11 @@
   "app": {
     "windows": [
       {
-        "title": "sacred-hero-database",
+        "title": "Sacred Hero Database",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "resizable": false,
+        "maximizable": false
       }
     ],
     "security": {

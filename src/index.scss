@@ -1,0 +1,92 @@
+:root {
+  /* ===== Backgrounds ===== */
+
+  --bg-app: #07111F;          /* Main window */
+  --bg-app-glow:
+    radial-gradient(circle at top center,
+      rgba(47, 134, 255, 0.12) 0%,
+      rgba(47, 134, 255, 0.04) 35%,
+      transparent 70%);
+  --bg-sidebar: #09172A;      /* Navigation */
+  --bg-surface: #0D1D34;      /* Cards */
+  --bg-surface-hover: #12284A;
+  --bg-surface-active: #163867;
+  --bg-surface-elevated: #132746;
+
+  /* ===== Borders ===== */
+
+  --border-subtle: #1A3256;
+  --border-default: #23436F;
+  --border-strong: #2E5B99;
+  --border-dashed: #315E96;
+
+  /* ===== Text ===== */
+
+  --text-primary: #F2F7FF;
+  --text-secondary: #B8C8E6;
+  --text-muted: #7F96B8;
+  --text-disabled: #5A6D8C;
+
+  /* ===== Primary Accent ===== */
+
+  --accent: #2F86FF;
+  --accent-hover: #4B99FF;
+  --accent-active: #1E6FE6;
+  --accent-soft: rgba(47, 134, 255, 0.15);
+
+  /* ===== Status Colors ===== */
+
+  --success: #41D97A;
+  --success-soft: rgba(65, 217, 122, 0.15);
+
+  --warning: #FFB02E;
+  --warning-soft: rgba(255, 176, 46, 0.15);
+
+  --danger: #FF4D57;
+  --danger-hover: #FF6670;
+  --danger-soft: rgba(255, 77, 87, 0.15);
+
+  --info: #59B8FF;
+  --info-soft: rgba(89, 184, 255, 0.15);
+
+  /* ===== Interactive ===== */
+
+  --focus-ring: #62A7FF;
+  --selection: rgba(47, 134, 255, 0.25);
+
+  /* ===== Inputs ===== */
+
+  --input-bg: #0A182D;
+  --input-border: #27456E;
+  --input-border-focus: #3A8CFF;
+  --input-placeholder: #6F86A8;
+
+  /* ===== Scrollbar ===== */
+
+  --scrollbar: #23436F;
+  --scrollbar-hover: #32629E;
+}
+
+:root {
+  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+
+  color: var(--text-primary);
+  background: var(--bg-app-glow), var(--bg-app);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+body, html, #root, #app {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
