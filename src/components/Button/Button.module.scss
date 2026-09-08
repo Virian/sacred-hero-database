@@ -1,0 +1,36 @@
+.button {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.button-primary {
+  background: var(--accent);
+  color: var(--text-primary);
+  border: 1px solid var(--accent);
+}
+
+.button-primary:hover {
+  background: var(--accent-hover);
+}
+
+.button-secondary {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
+}
+
+.button-secondary:hover {
+  background: var(--bg-surface-hover);
+}
+
+.button-danger {
+  background: var(--danger);
+  color: white;
+}
+
+.button-danger:hover {
+  background: var(--danger-hover);
+}
