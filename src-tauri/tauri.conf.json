@@ -13,8 +13,8 @@
     "windows": [
       {
         "title": "Sacred Hero Database",
-        "width": 800,
-        "height": 600,
+        "width": 1024,
+        "height": 700,
         "resizable": false,
         "maximizable": false
       }
