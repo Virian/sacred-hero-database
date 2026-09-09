@@ -16,6 +16,13 @@
   background: var(--accent-hover);
 }
 
+.button-primary:disabled {
+  background: var(--accent-soft);
+  color: var(--text-disabled);
+  border-color: var(--border-default);
+  cursor: not-allowed;
+}
+
 .button-secondary {
   background: transparent;
   color: var(--text-secondary);
@@ -26,11 +33,26 @@
   background: var(--bg-surface-hover);
 }
 
+.button-secondary:disabled {
+  background: transparent;
+  color: var(--text-disabled);
+  border-color: var(--border-subtle);
+  cursor: not-allowed;
+}
+
 .button-danger {
   background: var(--danger);
   color: white;
+  border: 1px solid var(--danger);
 }
 
 .button-danger:hover {
   background: var(--danger-hover);
+}
+
+.button-danger:disabled {
+  background: var(--danger-soft);
+  color: var(--text-disabled);
+  border-color: var(--danger);
+  cursor: not-allowed;
 }
