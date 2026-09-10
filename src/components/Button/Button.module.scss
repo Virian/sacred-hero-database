@@ -1,58 +1,60 @@
-.button {
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-}
+@layer component {
+  .button {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+  }
 
-.button-primary {
-  background: var(--accent);
-  color: var(--text-primary);
-  border: 1px solid var(--accent);
-}
+  .button-primary {
+    background: var(--accent);
+    color: var(--text-primary);
+    border: 1px solid var(--accent);
+  }
 
-.button-primary:hover {
-  background: var(--accent-hover);
-}
+  .button-primary:hover {
+    background: var(--accent-hover);
+  }
 
-.button-primary:disabled {
-  background: var(--accent-soft);
-  color: var(--text-disabled);
-  border-color: var(--border-default);
-  cursor: not-allowed;
-}
+  .button-primary:disabled {
+    background: var(--accent-soft);
+    color: var(--text-disabled);
+    border-color: var(--border-default);
+    cursor: not-allowed;
+  }
 
-.button-secondary {
-  background: transparent;
-  color: var(--text-secondary);
-  border: 1px solid var(--border-default);
-}
+  .button-secondary {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-default);
+  }
 
-.button-secondary:hover {
-  background: var(--bg-surface-hover);
-}
+  .button-secondary:hover {
+    background: var(--bg-surface-hover);
+  }
 
-.button-secondary:disabled {
-  background: transparent;
-  color: var(--text-disabled);
-  border-color: var(--border-subtle);
-  cursor: not-allowed;
-}
+  .button-secondary:disabled {
+    background: transparent;
+    color: var(--text-disabled);
+    border-color: var(--border-subtle);
+    cursor: not-allowed;
+  }
 
-.button-danger {
-  background: var(--danger);
-  color: white;
-  border: 1px solid var(--danger);
-}
+  .button-danger {
+    background: var(--danger);
+    color: white;
+    border: 1px solid var(--danger);
+  }
 
-.button-danger:hover {
-  background: var(--danger-hover);
-}
+  .button-danger:hover {
+    background: var(--danger-hover);
+  }
 
-.button-danger:disabled {
-  background: var(--danger-soft);
-  color: var(--text-disabled);
-  border-color: var(--danger);
-  cursor: not-allowed;
+  .button-danger:disabled {
+    background: var(--danger-soft);
+    color: var(--text-disabled);
+    border-color: var(--danger);
+    cursor: not-allowed;
+  }
 }

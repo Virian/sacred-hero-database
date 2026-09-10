@@ -1,0 +1,38 @@
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-default);
+  background-color: var(--bg-surface);
+}
+
+.headerContainer {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.header {
+  font-size: 0.875rem;
+}
+
+.headerDisclaimer {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.singleDetailContainer {
+  display: inline-flex;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+}
+
+.singleDetailLabel {
+  color: var(--text-secondary);
+}
+
+.singleDetailValue {
+  color: var(--text-primary);
+}

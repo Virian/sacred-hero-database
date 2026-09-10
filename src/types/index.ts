@@ -1,9 +1,9 @@
 import type { CharacterClass } from '../enums';
 
 export interface Character {
-  id: string | number; // TODO: decide on one once we know it
+  id: string;
   name: string;
-  class: CharacterClass;
+  characterClass: CharacterClass;
   level: number;
   isHardcore: boolean;
   deathCount: number;

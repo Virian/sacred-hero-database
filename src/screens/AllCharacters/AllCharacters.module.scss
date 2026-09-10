@@ -1,0 +1,63 @@
+.container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 1rem 0;
+  overflow: hidden;
+}
+
+.subheading {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  overflow: hidden;
+}
+
+.tableSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  padding-bottom: 1rem;
+  overflow: hidden;
+}
+
+.portraitCell {
+  padding-left: 0.75rem;
+}
+
+.nameCell {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.numberCell {
+  text-align: center;
+}
+
+.characterCount {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.separator {
+  height: 100%;
+  width: 1px;
+  background-color: var(--border-default);
+}
+
+.characterSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+

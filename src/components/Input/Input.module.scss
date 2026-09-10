@@ -1,18 +1,20 @@
-.input {
-  background-color: var(--input-bg);
-  border: 1px solid var(--input-border);
-  color: var(--text-primary);
-  padding: 0.5rem;
-  border-radius: 4px;
-  width: 100%;
+@layer component {
+  .input {
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text-primary);
+    padding: 0.5rem;
+    border-radius: 4px;
+    width: 100%;
 
-  &:focus {
-    outline: none;
-    border-color: var(--input-border-focus);
-    box-shadow: 0 0 0 1px var(--focus-ring);
-  }
+    &:focus {
+      outline: none;
+      border-color: var(--input-border-focus);
+      box-shadow: 0 0 0 1px var(--focus-ring);
+    }
 
-  &::placeholder {
-    color: var(--input-placeholder);
+    &::placeholder {
+      color: var(--input-placeholder);
+    }
   }
 }

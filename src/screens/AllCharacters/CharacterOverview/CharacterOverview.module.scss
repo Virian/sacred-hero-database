@@ -1,0 +1,35 @@
+.characterOverview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-default);
+  background-color: var(--bg-surface);
+}
+
+.allOverviewInformation {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.overviewTextInformationContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.overviewText {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.button {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+}

@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { ArrowUpDown, Save } from 'lucide-react';
 
-import { Button, CharacterCard, EmptyCharacterCard } from '../../components';
+import { Button } from '../../components';
 import { CharacterClass } from '../../enums';
+import { CharacterCard, EmptyCharacterCard } from './CharacterCard';
 import styles from './Characters.module.scss';
 
 const MOCK_CHARACTERS = [
   {
-    id: 1,
+    id: '1',
     name: 'Ares',
-    class: CharacterClass.GLADIATOR,
+    characterClass: CharacterClass.GLADIATOR,
     level: 42,
     isHardcore: true,
     deathCount: 0,
@@ -19,9 +20,9 @@ const MOCK_CHARACTERS = [
     version: 1,
   },
   {
-    id: 2,
+    id: '2',
     name: 'Seraphina',
-    class: CharacterClass.SERAPHIM,
+    characterClass: CharacterClass.SERAPHIM,
     level: 37,
     isHardcore: false,
     deathCount: 2,
@@ -31,9 +32,9 @@ const MOCK_CHARACTERS = [
     version: 1,
   },
   {
-    id: 3,
+    id: '3',
     name: 'Shadow',
-    class: CharacterClass.DARK_ELF,
+    characterClass: CharacterClass.DARK_ELF,
     level: 28,
     isHardcore: false,
     deathCount: 0,
@@ -43,9 +44,9 @@ const MOCK_CHARACTERS = [
     version: 1,
   },
   {
-    id: 4,
+    id: '4',
     name: 'Sylvan',
-    class: CharacterClass.WOOD_ELF,
+    characterClass: CharacterClass.WOOD_ELF,
     level: 31,
     isHardcore: true,
     deathCount: 0,
@@ -55,9 +56,9 @@ const MOCK_CHARACTERS = [
     version: 1,
   },
   {
-    id: 5,
+    id: '5',
     name: 'Merlin',
-    class: CharacterClass.BATTLE_MAGE,
+    characterClass: CharacterClass.BATTLE_MAGE,
     level: 40,
     isHardcore: false,
     deathCount: 12,
@@ -67,9 +68,9 @@ const MOCK_CHARACTERS = [
     version: 1,
   },
   {
-    id: 6,
+    id: '6',
     name: 'Vladis',
-    class: CharacterClass.VAMPIRESS,
+    characterClass: CharacterClass.VAMPIRESS,
     level: 26,
     isHardcore: false,
     deathCount: 0,

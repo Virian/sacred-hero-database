@@ -1,0 +1,49 @@
+.card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 125px;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-default);
+  background-color: var(--bg-surface);
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--bg-surface-hover);
+  }
+
+  &.active {
+    border-color: var(--accent);
+    background-color: var(--bg-surface-active);
+    box-shadow: 0 0 0 1px var(--accent-soft);
+  }
+}
+
+.content {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.cardNumber {
+  position: absolute;
+  top: 0.25rem;
+  left: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.characterInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.characterName {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.characterDetails {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}

@@ -1,5 +1,7 @@
-.group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
+@layer component {
+  .group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
 }
