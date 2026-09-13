@@ -1,33 +1,55 @@
-import { useState } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { CircleCheck, CircleX, Download, Info } from 'lucide-react';
+
+import { Button, CharacterPortrait } from '../../components';
+import { CharacterClass } from '../../enums';
+
+import styles from './Import.module.scss';
 
 export const Import = () => {
-  const [greetMsg, setGreetMsg] = useState('');
-  const [name, setName] = useState('');
-
-  const greet = async () => {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    await invoke('read_save_file', { path: name });
-    setGreetMsg(await invoke('greet', { name }));
-  };
-
   return (
-    <div>
-      <h1>Welcome to Tauri + React</h1>
-
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
+    <div className={styles.container}>
+      <h1>Import Character</h1>
+      <div className={styles.dropArea}>
+        <Download
+          size={48}
+          className={styles.importIcon}
         />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
+        <span className={styles.dragText}>Drag save files here</span>
+        <span className={styles.dragAlternativeText}>or</span>
+        <Button variant="secondary">Browse files...</Button>
+      </div>
+      <div className={styles.importedContainer}>
+        <h4 className={styles.headerRow}>Imported files</h4>
+        <div className={styles.importedRow}>
+          <div className={styles.fileInformation}>
+            <CharacterPortrait
+              characterClass={CharacterClass.WOOD_ELF}
+              size={36}
+            />
+            <div className={styles.importedTextInformationContainer}>
+              <span className={styles.fileName}>Hero00.pax</span>
+              <span className={styles.importStatus}>Successfully imported</span>
+            </div>
+          </div>
+          <CircleCheck className={styles.successIcon} />
+        </div>
+        <div className={styles.importedRow}>
+          <div className={styles.fileInformation}>
+            <div className={styles.importedTextInformationContainer}>
+              <span className={styles.fileName}>Hero01.pax</span>
+              <span className={styles.importStatus}>Import failed</span>
+            </div>
+          </div>
+          <CircleX className={styles.failureIcon} />
+        </div>
+      </div>
+      <div className={styles.information}>
+        <Info size={18} />
+        <span className={styles.informationText}>
+          The application automatically groups imported character versions by
+          name and class.
+        </span>
+      </div>
     </div>
   );
 };
