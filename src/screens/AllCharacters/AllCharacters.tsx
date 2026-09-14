@@ -10,6 +10,7 @@ import type { Character } from '../../types';
 
 import { CharacterOverview } from './CharacterOverview/CharacterOverview';
 import { CharacterDetails } from './CharacterDetails/CharacterDetails';
+import { CharacterVersions } from './CharacterVersions/CharacterVersions';
 import styles from './AllCharacters.module.scss';
 
 interface CharacterRow {
@@ -179,6 +180,9 @@ const MOCK_CHARACTERS: CharacterWithVersionCount[] = [
 export const AllCharacters = () => {
   const [selectedCharacter, setSelectedCharacter] =
     useState<CharacterWithVersionCount | null>(null);
+  const [characterIdBrowseVersions, setCharacterIdBrowseVersions] = useState<
+    string | null
+  >(null);
 
   const handleRowClick = (characterId: string) => {
     const clickedCharacter = MOCK_CHARACTERS.find(
@@ -186,6 +190,24 @@ export const AllCharacters = () => {
     );
     setSelectedCharacter(clickedCharacter || null);
   };
+
+  const handleViewVersions = (id: string) => {
+    setCharacterIdBrowseVersions(id);
+  };
+
+  const handleBackFromVersions = () => {
+    setSelectedCharacter(null);
+    setCharacterIdBrowseVersions(null);
+  };
+
+  if (characterIdBrowseVersions && selectedCharacter) {
+    return (
+      <CharacterVersions
+        character={selectedCharacter}
+        onBack={handleBackFromVersions}
+      />
+    );
+  }
 
   return (
     <div className={styles.container}>
@@ -198,6 +220,7 @@ export const AllCharacters = () => {
           <CharacterTable
             columnDefinitions={columnDefinitions}
             rows={MOCK_CHARACTERS}
+            isFullWidth
             selectedRowIds={selectedCharacter ? [selectedCharacter.id] : []}
             onRowClick={handleRowClick}
           />
@@ -214,7 +237,11 @@ export const AllCharacters = () => {
                 characterClass={selectedCharacter.characterClass}
                 name={selectedCharacter.name}
                 level={selectedCharacter.level}
-                versionCount={selectedCharacter.versionCount}
+                levelLabel="Latest Lv"
+                overviewText={`${selectedCharacter.versionCount} versions`}
+                onActivate={() => null}
+                onViewVersions={handleViewVersions}
+                onDelete={() => null}
               />
               <CharacterDetails
                 isHardcore={selectedCharacter.isHardcore}

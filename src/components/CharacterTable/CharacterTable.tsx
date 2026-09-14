@@ -9,12 +9,15 @@ export interface ColumnDefinition<TRow extends { id: string }, TValue = any> {
   width?: number | string;
   headerCellClass?: string;
   rowCellClass?: string;
-  cellRenderer?: (value: TValue) => React.ReactNode;
+  cellRenderer?: (value: TValue, row: TRow) => React.ReactNode;
 }
 
 interface CharacterTableProps<TRow extends { id: string }> {
   columnDefinitions: ColumnDefinition<TRow>[];
   rows: TRow[];
+  className?: string;
+  rowClassName?: string;
+  isFullWidth?: boolean;
   selectedRowIds?: string[];
   onRowClick?: (rowId: string) => void;
 }
@@ -24,6 +27,9 @@ export const CharacterTable = <
 >({
   columnDefinitions,
   rows,
+  className = '',
+  rowClassName = '',
+  isFullWidth = false,
   selectedRowIds = [],
   onRowClick,
 }: CharacterTableProps<TRow>) => {
@@ -33,7 +39,7 @@ export const CharacterTable = <
       : null;
 
     if (columnDefinition.cellRenderer) {
-      return columnDefinition.cellRenderer(cellValue);
+      return columnDefinition.cellRenderer(cellValue, row);
     }
 
     return cellValue;
@@ -51,13 +57,17 @@ export const CharacterTable = <
 
   return (
     <div
-      className={styles.grid}
+      className={clsx(
+        styles.grid,
+        { [styles.fullWidth]: isFullWidth },
+        className,
+      )}
       style={{
         gridTemplateColumns: templateColumns,
       }}
     >
       <div
-        className={styles.headerRow}
+        className={clsx(styles.headerRow, rowClassName)}
         style={{ gridColumn: `1 / span ${columnDefinitions.length}` }}
       >
         {columnDefinitions.map((columnDefinition) => (
@@ -76,9 +86,13 @@ export const CharacterTable = <
         {rows.map((row) => (
           <div
             key={row.id}
-            className={clsx(styles.row, {
-              [styles.selected]: selectedRowIds.includes(row.id),
-            })}
+            className={clsx(
+              styles.row,
+              {
+                [styles.selected]: selectedRowIds.includes(row.id),
+              },
+              rowClassName,
+            )}
             style={{ gridColumn: `1 / span ${columnDefinitions.length}` }}
             onClick={() => onRowClick?.(row.id)}
           >

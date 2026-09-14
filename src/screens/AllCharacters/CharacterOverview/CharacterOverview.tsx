@@ -1,3 +1,5 @@
+import clsx from 'clsx';
+
 import { Button, CharacterPortrait } from '../../../components';
 import type { Character } from '../../../types';
 
@@ -7,18 +9,22 @@ type CharacterOverviewProps = Pick<
   Character,
   'id' | 'characterClass' | 'name' | 'level'
 > & {
-  versionCount: number;
+  className?: string;
+  levelLabel?: string;
+  overviewText?: string;
   onActivate?: (id: string) => void;
   onViewVersions?: (id: string) => void;
   onDelete?: (id: string) => void;
 };
 
 export const CharacterOverview = ({
+  className = '',
   id,
   characterClass,
   name,
   level,
-  versionCount,
+  levelLabel = 'Lv',
+  overviewText,
   onActivate,
   onViewVersions,
   onDelete,
@@ -28,7 +34,7 @@ export const CharacterOverview = ({
   const handleDelete = () => onDelete?.(id);
 
   return (
-    <div className={styles.characterOverview}>
+    <div className={clsx(styles.characterOverview, className)}>
       <div className={styles.allOverviewInformation}>
         <CharacterPortrait
           characterClass={characterClass}
@@ -37,32 +43,41 @@ export const CharacterOverview = ({
         <div className={styles.overviewTextInformationContainer}>
           <h4>{name}</h4>
           <p className={styles.overviewText}>
-            {characterClass} · Latest Lv{level}
+            {characterClass} · {levelLabel}
+            {level}
           </p>
-          <p className={styles.overviewText}>{versionCount} versions</p>
+          {overviewText && (
+            <p className={styles.overviewText}>{overviewText}</p>
+          )}
         </div>
       </div>
       <div className={styles.actions}>
-        <Button
-          className={styles.button}
-          onClick={handleActivate}
-        >
-          Make active
-        </Button>
-        <Button
-          variant="secondary"
-          className={styles.button}
-          onClick={handleViewVersions}
-        >
-          View versions
-        </Button>
-        <Button
-          variant="danger"
-          className={styles.button}
-          onClick={handleDelete}
-        >
-          Delete
-        </Button>
+        {onActivate && (
+          <Button
+            className={styles.button}
+            onClick={handleActivate}
+          >
+            Make active
+          </Button>
+        )}
+        {onViewVersions && (
+          <Button
+            variant="secondary"
+            className={styles.button}
+            onClick={handleViewVersions}
+          >
+            View versions
+          </Button>
+        )}
+        {onDelete && (
+          <Button
+            variant="danger"
+            className={styles.button}
+            onClick={handleDelete}
+          >
+            Delete
+          </Button>
+        )}
       </div>
     </div>
   );
