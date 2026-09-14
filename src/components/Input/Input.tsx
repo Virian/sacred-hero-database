@@ -1,31 +1,16 @@
 import clsx from 'clsx';
-import type { ChangeEvent } from 'react';
-import styles from './Input.module.scss';
+import type { InputHTMLAttributes } from 'react';
 
-interface InputProps {
-  className?: string;
-  id?: string;
-  name?: string;
-  onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
-  placeholder?: string;
-  value?: string;
-}
+import styles from './Input.module.scss';
 
 export const Input = ({
   className,
-  id,
-  name,
-  onChange,
-  placeholder,
-  value,
-}: InputProps) => (
+  type = 'text',
+  ...inputProps
+}: InputHTMLAttributes<HTMLInputElement>) => (
   <input
+    {...inputProps}
     className={clsx(styles.input, className)}
-    type="text"
-    id={id}
-    name={name}
-    onChange={onChange}
-    placeholder={placeholder}
-    value={value}
+    type={type}
   />
 );

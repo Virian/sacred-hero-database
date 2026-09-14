@@ -1,4 +1,4 @@
-import type { ChangeEvent } from 'react';
+import type { ChangeEvent, HTMLAttributes } from 'react';
 import { Radio } from './Radio';
 import styles from './RadioGroup.module.scss';
 
@@ -7,7 +7,10 @@ interface RadioGroupOption {
   value: string;
 }
 
-interface RadioGroupProps {
+interface RadioGroupProps extends Omit<
+  HTMLAttributes<HTMLDivElement>,
+  'onChange'
+> {
   name: string;
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
   options: RadioGroupOption[];
@@ -15,12 +18,17 @@ interface RadioGroupProps {
 }
 
 export const RadioGroup = ({
+  className,
   name,
   onChange,
   options,
   value,
+  ...groupProps
 }: RadioGroupProps) => (
-  <div className={styles.group}>
+  <div
+    {...groupProps}
+    className={`${styles.group} ${className ?? ''}`}
+  >
     {options.map((option) => (
       <Radio
         key={option.value}
