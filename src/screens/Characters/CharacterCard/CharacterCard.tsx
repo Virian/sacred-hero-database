@@ -1,35 +1,46 @@
-import clsx from 'clsx';
+import { Save } from 'lucide-react';
 
-import { CharacterPortrait } from '../../../components';
+import { Button, CharacterPortrait } from '../../../components';
 import { Character } from '../../../types';
 import { formatTime } from '../../../utils';
 import styles from './CharacterCard.module.scss';
 
 interface CharacterCardProps {
   cardNumber?: number;
-  isActive?: boolean;
   character: Character;
-  onClick?: () => void;
+  onBackup?: (character: Character) => void;
 }
 
 export const CharacterCard = ({
   cardNumber,
-  isActive = false,
   character,
-  onClick,
+  onBackup,
 }: CharacterCardProps) => {
+  const handleBackup = () => {
+    onBackup?.(character);
+  };
+
   return (
-    <div
-      className={clsx(styles.card, { [styles.active]: isActive })}
-      onClick={onClick}
-    >
+    <div className={styles.card}>
       <div className={styles.content}>
         <span className={styles.cardNumber}>{cardNumber}</span>
 
-        <CharacterPortrait
-          characterClass={character.characterClass}
-          size={56}
-        />
+        <div className={styles.leftSection}>
+          <CharacterPortrait
+            characterClass={character.characterClass}
+            size={56}
+          />
+          <Button
+            variant="secondary"
+            className={styles.button}
+            onClick={handleBackup}
+          >
+            <span className={styles.buttonText}>
+              <Save size={14} />
+              Backup
+            </span>
+          </Button>
+        </div>
 
         <div className={styles.characterInfo}>
           <h3 className={styles.characterName}>{character.name}</h3>

@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { ArrowUpDown, Save } from 'lucide-react';
+import { ArrowUpDown } from 'lucide-react';
 
 import { Button } from '../../components';
 import { CharacterClass } from '../../enums';
@@ -82,16 +81,6 @@ const MOCK_CHARACTERS = [
 ];
 
 export const Characters = () => {
-  const [activeCharacterSlot, setActiveCharacterSlot] = useState<number | null>(
-    null,
-  );
-
-  const handleCharacterCardClick = (slotNumber: number) => {
-    setActiveCharacterSlot(() =>
-      activeCharacterSlot === slotNumber ? null : slotNumber,
-    );
-  };
-
   return (
     <div className={styles.container}>
       <h1>Characters</h1>
@@ -99,39 +88,27 @@ export const Characters = () => {
       <div className={styles.characters}>
         <CharacterCard
           cardNumber={1}
-          isActive={activeCharacterSlot === 1}
           character={MOCK_CHARACTERS[0]}
-          onClick={() => handleCharacterCardClick(1)}
         />
         <CharacterCard
           cardNumber={2}
-          isActive={activeCharacterSlot === 2}
           character={MOCK_CHARACTERS[1]}
-          onClick={() => handleCharacterCardClick(2)}
         />
         <CharacterCard
           cardNumber={3}
-          isActive={activeCharacterSlot === 3}
           character={MOCK_CHARACTERS[2]}
-          onClick={() => handleCharacterCardClick(3)}
         />
         <CharacterCard
           cardNumber={4}
-          isActive={activeCharacterSlot === 4}
           character={MOCK_CHARACTERS[3]}
-          onClick={() => handleCharacterCardClick(4)}
         />
         <CharacterCard
           cardNumber={5}
-          isActive={activeCharacterSlot === 5}
           character={MOCK_CHARACTERS[4]}
-          onClick={() => handleCharacterCardClick(5)}
         />
         <CharacterCard
           cardNumber={6}
-          isActive={activeCharacterSlot === 6}
           character={MOCK_CHARACTERS[5]}
-          onClick={() => handleCharacterCardClick(6)}
         />
         <EmptyCharacterCard cardNumber={7} />
         <EmptyCharacterCard cardNumber={8} />
@@ -141,15 +118,6 @@ export const Characters = () => {
           <span className={styles.buttonText}>
             <ArrowUpDown size={16} />
             Change Order
-          </span>
-        </Button>
-        <Button
-          variant="secondary"
-          disabled={activeCharacterSlot === null}
-        >
-          <span className={styles.buttonText}>
-            <Save size={16} />
-            Backup
           </span>
         </Button>
       </div>
