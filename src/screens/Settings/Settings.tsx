@@ -1,35 +1,67 @@
-import { Formik, type FormikErrors } from 'formik';
+import { useContext, useMemo } from 'react';
+import { Formik, type FormikHelpers } from 'formik';
 import { X, Save } from 'lucide-react';
+import { toast } from 'react-toastify';
+import { invoke } from '@tauri-apps/api/core';
+import { open } from '@tauri-apps/plugin-dialog';
 
 import { Button, Input, RadioGroup } from '../../components';
-import { isValidPath } from './isValidPath';
+import { Commands } from '../../constants';
+import { SettingsContext } from '../../context';
+
+import { validate } from './validate';
+import { characterSlotsOptions } from './Settings.constants';
+import type { FormValues } from './Settings.types';
 import styles from './Settings.module.scss';
 
-interface FormValues {
-  installationPath: string;
-  activeCharacterSlots: string;
-}
-
-const validate = (values: FormValues) => {
-  const errors: FormikErrors<FormValues> = {};
-
-  if (!values.installationPath) {
-    errors.installationPath = 'Installation path is required.';
-  } else if (!isValidPath(values.installationPath)) {
-    errors.installationPath = 'Installation path must be a valid path.';
-  }
-
-  return errors;
-};
-
 export const Settings = () => {
-  const saveSettings = (values: FormValues) => {
-    console.log('submit', values);
+  const { settings, fetchSettings } = useContext(SettingsContext);
+
+  const initialFormValues: FormValues = useMemo(
+    () => ({
+      installationPath: settings.gameInstallationPath,
+      activeCharacterSlots: `${settings.activeCharacterSlots}`,
+    }),
+    [settings.gameInstallationPath, settings.activeCharacterSlots],
+  );
+
+  const saveSettings = async (values: FormValues) => {
+    try {
+      await invoke(Commands.UPDATE_SETTINGS, {
+        gameInstallationPath: values.installationPath,
+        activeCharacterSlots: parseInt(values.activeCharacterSlots),
+      });
+      await fetchSettings();
+      toast.success('Settings saved successfully.', {
+        position: 'bottom-center',
+        theme: 'dark',
+      });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      toast.error('Failed to save settings.', {
+        position: 'bottom-center',
+        theme: 'dark',
+      });
+    }
+  };
+
+  const handleBrowse = async (
+    setFieldValue: FormikHelpers<FormValues>['setFieldValue'],
+  ) => {
+    const installationPath = await open({
+      multiple: false,
+      directory: true,
+    });
+
+    if (installationPath) {
+      setFieldValue('installationPath', installationPath || '', true);
+    }
   };
 
   return (
     <Formik<FormValues>
-      initialValues={{ installationPath: '', activeCharacterSlots: '8' }}
+      initialValues={initialFormValues}
+      enableReinitialize
       validate={validate}
       onSubmit={saveSettings}
     >
@@ -42,6 +74,7 @@ export const Settings = () => {
         handleBlur,
         handleSubmit,
         resetForm,
+        setFieldValue,
       }) => (
         <form
           className={styles.container}
@@ -85,7 +118,12 @@ export const Settings = () => {
                 onChange={handleChange}
                 onBlur={handleBlur}
               />
-              <Button variant="secondary">Browse...</Button>
+              <Button
+                variant="secondary"
+                onClick={() => handleBrowse(setFieldValue)}
+              >
+                Browse...
+              </Button>
             </div>
             {errors.installationPath && touched.installationPath && (
               <span className={styles.errorText}>
@@ -97,10 +135,7 @@ export const Settings = () => {
             <h2 className={styles.sectionTitle}>Active character slots</h2>
             <RadioGroup
               name="activeCharacterSlots"
-              options={[
-                { label: '8 slots (Sacred Underworld)', value: '8' },
-                { label: '6 slots (Sacred Plus Compatibility)', value: '6' },
-              ]}
+              options={characterSlotsOptions}
               value={values.activeCharacterSlots}
               onChange={handleChange}
               onBlur={handleBlur}

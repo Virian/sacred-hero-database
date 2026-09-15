@@ -14,12 +14,15 @@
   },
   "dependencies": {
     "@tauri-apps/api": "2.11.1",
+    "@tauri-apps/plugin-dialog": "2.7.3",
     "@tauri-apps/plugin-opener": "2.5.5",
     "clsx": "2.1.1",
     "formik": "2.4.9",
     "lucide-react": "1.46.0",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "react-toastify": "11.1.0",
+    "react-tooltip": "6.0.8"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

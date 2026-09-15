@@ -26,12 +26,45 @@ pub async fn get_settings(state: &SettingsState) -> Result<Value, String> {
     }
 }
 
+pub async fn update_settings(
+    state: &SettingsState,
+    game_installation_path: String,
+    active_character_slots: u32,
+) -> Result<(), String> {
+    let mut cached_settings = state.settings.lock().await;
+    let settings = match cached_settings.as_ref() {
+        Some(Ok(settings)) => settings.clone(),
+        Some(Err(error)) => return Err(error.clone()),
+        None => return Err("Settings have not been initialized.".to_string()),
+    };
+
+    let mut updated_settings = settings;
+    let settings_object = updated_settings
+        .as_object_mut()
+        .ok_or_else(|| "settings.json must contain a JSON object.".to_string())?;
+
+    settings_object.insert(
+        "gameInstallationPath".to_string(),
+        Value::String(game_installation_path),
+    );
+    settings_object.insert(
+        "activeCharacterSlots".to_string(),
+        Value::from(active_character_slots),
+    );
+
+    let contents =
+        serde_json::to_string_pretty(&updated_settings).map_err(|error| error.to_string())?;
+    fs::write(settings_path()?, contents)
+        .await
+        .map_err(|error| error.to_string())?;
+
+    *cached_settings = Some(Ok(updated_settings));
+
+    Ok(())
+}
+
 async fn load_settings() -> Result<Value, String> {
-    let executable_path = std::env::current_exe().map_err(|error| error.to_string())?;
-    let executable_directory = executable_path
-        .parent()
-        .ok_or_else(|| "The executable directory could not be determined.".to_string())?;
-    let settings_path = executable_directory.join("settings.json");
+    let settings_path = settings_path()?;
 
     let mut settings: Value = match fs::read_to_string(&settings_path).await {
         Ok(contents) => serde_json::from_str(&contents).map_err(|error| error.to_string())?,
@@ -81,6 +114,15 @@ async fn load_settings() -> Result<Value, String> {
         .map_err(|error| error.to_string())?;
 
     Ok(settings)
+}
+
+fn settings_path() -> Result<std::path::PathBuf, String> {
+    let executable_path = std::env::current_exe().map_err(|error| error.to_string())?;
+    let executable_directory = executable_path
+        .parent()
+        .ok_or_else(|| "The executable directory could not be determined.".to_string())?;
+
+    Ok(executable_directory.join("settings.json"))
 }
 
 #[cfg(windows)]

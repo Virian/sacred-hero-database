@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 
+import { CharacterSlots, Commands } from '../constants';
 import type { GetSettingsCommand, Settings } from '../types';
 
 import { SettingsContext } from './SettingsContext';
@@ -12,21 +13,29 @@ interface SettingsProviderProps {
 export const SettingsProvider = ({ children }: SettingsProviderProps) => {
   const [settings, setSettings] = useState<Settings>({
     gameInstallationPath: '',
-    activeCharacterSlots: '8',
+    activeCharacterSlots: CharacterSlots.UNDERWORLD,
   });
   const [isInitialized, setIsInitialized] = useState(false);
   const [initializationError, setInitializationError] = useState<string | null>(
     null,
   );
 
+  const fetchSettings = useCallback(async () => {
+    const response = await invoke<GetSettingsCommand>(Commands.GET_SETTINGS);
+
+    const newSettings = {
+      gameInstallationPath: response.gameInstallationPath,
+      activeCharacterSlots: response.activeCharacterSlots,
+    };
+    setSettings(newSettings);
+
+    return newSettings;
+  }, []);
+
   useEffect(() => {
     const init = async () => {
       try {
-        const response = await invoke<GetSettingsCommand>('get_settings');
-        setSettings({
-          gameInstallationPath: response.gameInstallationPath,
-          activeCharacterSlots: `${response.activeCharacterSlots}`,
-        });
+        fetchSettings();
       } catch (error) {
         if (error instanceof Error) {
           setInitializationError(error.message);
@@ -41,11 +50,17 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     };
 
     init();
-  }, []);
+  }, [fetchSettings]);
 
   return (
     <SettingsContext.Provider
-      value={{ settings, setSettings, isInitialized, initializationError }}
+      value={{
+        settings,
+        setSettings,
+        fetchSettings,
+        isInitialized,
+        initializationError,
+      }}
     >
       {children}
     </SettingsContext.Provider>

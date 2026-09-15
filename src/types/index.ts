@@ -17,5 +17,5 @@ export interface Character {
 
 export interface Settings {
   gameInstallationPath: string;
-  activeCharacterSlots: string;
+  activeCharacterSlots: number;
 }

@@ -6,6 +6,7 @@ import {
   Settings as SettingsIcon,
   TriangleAlert,
 } from 'lucide-react';
+import { Tooltip } from 'react-tooltip';
 
 import { Badge, Menu, MenuOption, SettingsError, Spinner } from './components';
 import { SettingsContext } from './context';
@@ -15,10 +16,13 @@ import { AllCharacters, Characters, Import, Settings } from './screens';
 import styles from './AppContent.module.scss';
 
 export const AppContent = () => {
-  const { isInitialized, initializationError } = useContext(SettingsContext);
+  const { settings, isInitialized, initializationError } =
+    useContext(SettingsContext);
   const [activeMenuOption, setActiveMenuOption] = useState<MenuOptions>(
     MenuOptions.CHARACTERS,
   );
+
+  const isGameInstallationPathMissing = !settings.gameInstallationPath;
 
   const renderActiveScreen = () => {
     switch (activeMenuOption) {
@@ -77,15 +81,21 @@ export const AppContent = () => {
             isActive={activeMenuOption === MenuOptions.SETTINGS}
             onClick={() => setActiveMenuOption(MenuOptions.SETTINGS)}
             rightContent={
-              <TriangleAlert
-                size={18}
-                color="var(--warning)"
-              />
+              isGameInstallationPathMissing && (
+                <TriangleAlert
+                  className={styles.warningIcon}
+                  size={18}
+                  data-tooltip-id="settings-warning"
+                  data-tooltip-content="Game installation path is not set"
+                  data-tooltip-place="bottom"
+                />
+              )
             }
           />
         </Menu>
       </nav>
       <main className={styles.main}>{renderActiveScreen()}</main>
+      <Tooltip id="settings-warning" />
     </div>
   );
 };

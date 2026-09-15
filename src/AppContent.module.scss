@@ -23,6 +23,10 @@
   border-right: 1px solid var(--border-default);
 }
 
+.warningIcon {
+  color: var(--warning);
+}
+
 .main {
   flex: 1;
   display: flex;
