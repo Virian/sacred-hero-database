@@ -27,7 +27,7 @@ export const AppContent = () => {
   const renderActiveScreen = () => {
     switch (activeMenuOption) {
       case MenuOptions.CHARACTERS:
-        return <Characters />;
+        return <Characters setActiveMenuOption={setActiveMenuOption} />;
       case MenuOptions.ALL_CHARACTERS:
         return <AllCharacters />;
       case MenuOptions.IMPORT:

@@ -1,126 +1,154 @@
-import { RefreshCw } from 'lucide-react';
+import { useContext, useMemo, type Dispatch, type SetStateAction } from 'react';
+import { CircleX, RefreshCw } from 'lucide-react';
 
-import { Button } from '../../components';
-import { CharacterClass } from '../../enums';
+import { Button, Spinner } from '../../components';
+import { SettingsContext } from '../../context';
+import { CharacterClass, Commands, MenuOptions } from '../../enums';
+import { useInvokeQuery } from '../../hooks';
+import type { GetActiveCharactersCommandResponse } from '../../types';
+
 import { CharacterCard, EmptyCharacterCard } from './CharacterCard';
+import { stripCharacterFormatting } from './stripCharacterFormatting';
 import styles from './Characters.module.scss';
 
-const MOCK_CHARACTERS = [
-  {
-    id: '1',
-    name: 'Ares',
-    characterClass: CharacterClass.GLADIATOR,
-    level: 42,
-    isHardcore: true,
-    deathCount: 0,
-    survivalBonus: 38,
-    playTime: 45240, // in seconds
-    modifiedAt: new Date(),
-    version: 1,
-  },
-  {
-    id: '2',
-    name: 'Seraphina',
-    characterClass: CharacterClass.SERAPHIM,
-    level: 37,
-    isHardcore: false,
-    deathCount: 2,
-    survivalBonus: 95,
-    playTime: 33120, // in seconds
-    modifiedAt: new Date(),
-    version: 1,
-  },
-  {
-    id: '3',
-    name: 'Shadow',
-    characterClass: CharacterClass.DARK_ELF,
-    level: 28,
-    isHardcore: false,
-    deathCount: 0,
-    survivalBonus: 76,
-    playTime: 24300, // in seconds
-    modifiedAt: new Date(),
-    version: 1,
-  },
-  {
-    id: '4',
-    name: 'Sylvan',
-    characterClass: CharacterClass.WOOD_ELF,
-    level: 31,
-    isHardcore: true,
-    deathCount: 0,
-    survivalBonus: 84,
-    playTime: 28320, // in seconds
-    modifiedAt: new Date(),
-    version: 1,
-  },
-  {
-    id: '5',
-    name: 'Merlin',
-    characterClass: CharacterClass.BATTLE_MAGE,
-    level: 40,
-    isHardcore: false,
-    deathCount: 12,
-    survivalBonus: 5,
-    playTime: 40860, // in seconds
-    modifiedAt: new Date(),
-    version: 1,
-  },
-  {
-    id: '6',
-    name: 'Vladis',
-    characterClass: CharacterClass.VAMPIRESS,
-    level: 26,
-    isHardcore: false,
-    deathCount: 0,
-    survivalBonus: 64,
-    playTime: 19980, // in seconds
-    modifiedAt: new Date(),
-    version: 1,
-  },
-];
+interface ActiveCharacter {
+  id: string;
+  name: string;
+  characterClass: CharacterClass;
+  level: number;
+  isHardcore: boolean;
+  deathCount: number;
+  survivalBonus: number;
+  playTime: number;
+  modifiedAt: Date;
+}
 
-export const Characters = () => {
+interface CharactersProps {
+  // TODO: replace with react-router
+  setActiveMenuOption: Dispatch<SetStateAction<MenuOptions>>;
+}
+
+export const Characters = ({ setActiveMenuOption }: CharactersProps) => {
+  const {
+    settings: { gameInstallationPath, activeCharacterSlots },
+  } = useContext(SettingsContext);
+
+  const {
+    data,
+    isLoading,
+    isPending,
+    refetch: refetchActiveCharacters,
+  } = useInvokeQuery<
+    GetActiveCharactersCommandResponse,
+    Array<ActiveCharacter | null>
+  >({
+    command: Commands.GET_ACTIVE_CHARACTERS,
+    mapper: (data) =>
+      data.map(({ character, slot }) =>
+        character
+          ? {
+              id: `${slot}`,
+              name: stripCharacterFormatting(character.name),
+              characterClass: character.class,
+              level: character.level,
+              isHardcore: character.hardcore,
+              deathCount: character.revivals,
+              survivalBonus: character.survival_bonus,
+              playTime: character.play_time.secs,
+              modifiedAt: new Date(character.modified.secs_since_epoch * 1000),
+            }
+          : null,
+      ),
+  });
+
+  const activeCharacters: Array<ActiveCharacter | null> = useMemo(() => {
+    const baseArray = new Array(activeCharacterSlots).fill(null);
+
+    return baseArray.map((_, index) => {
+      const slotNumber = `${index + 1}`;
+      return (
+        (data || []).find((character) => character?.id === slotNumber) || null
+      );
+    });
+  }, [activeCharacterSlots, data]);
+
+  const goToSettings = () => {
+    setActiveMenuOption(MenuOptions.SETTINGS);
+  };
+
+  const renderContent = () => {
+    if (!gameInstallationPath) {
+      return (
+        <div className={styles.errorContainer}>
+          <CircleX
+            size={36}
+            className={styles.errorIcon}
+          />
+          <span>Could not load active characters.</span>
+          <span className={styles.errorDescription}>
+            Set your game installation path in{' '}
+            <a
+              href="#"
+              className={styles.link}
+              onClick={goToSettings}
+            >
+              Settings
+            </a>{' '}
+            to load your active characters.
+          </span>
+        </div>
+      );
+    }
+
+    if (isLoading) {
+      return (
+        <div className={styles.spinnerContainer}>
+          <Spinner />
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <div className={styles.characters}>
+          {activeCharacters.map((character, index) =>
+            character ? (
+              <CharacterCard
+                key={character.id}
+                cardNumber={index + 1}
+                character={character}
+              />
+            ) : (
+              <EmptyCharacterCard
+                key={index + 1}
+                cardNumber={index + 1}
+              />
+            ),
+          )}
+        </div>
+        <div className={styles.actions}>
+          <Button
+            variant="secondary"
+            isLoading={isPending}
+            onClick={() => refetchActiveCharacters()}
+          >
+            <span className={styles.buttonText}>
+              <RefreshCw size={16} />
+              Refresh
+            </span>
+          </Button>
+        </div>
+      </>
+    );
+  };
+
   return (
     <div className={styles.container}>
       <h1>Characters</h1>
-      <h2 className={styles.subheading}>Active character slots (1 - 8)</h2>
-      <div className={styles.characters}>
-        <CharacterCard
-          cardNumber={1}
-          character={MOCK_CHARACTERS[0]}
-        />
-        <CharacterCard
-          cardNumber={2}
-          character={MOCK_CHARACTERS[1]}
-        />
-        <CharacterCard
-          cardNumber={3}
-          character={MOCK_CHARACTERS[2]}
-        />
-        <CharacterCard
-          cardNumber={4}
-          character={MOCK_CHARACTERS[3]}
-        />
-        <CharacterCard
-          cardNumber={5}
-          character={MOCK_CHARACTERS[4]}
-        />
-        <CharacterCard
-          cardNumber={6}
-          character={MOCK_CHARACTERS[5]}
-        />
-        <EmptyCharacterCard cardNumber={7} />
-        <EmptyCharacterCard cardNumber={8} />
-      </div>
-      <div className={styles.actions}>
-        <Button variant="secondary">
-          <span className={styles.buttonText}>
-            <RefreshCw size={16} />
-            Refresh
-          </span>
-        </Button>
-      </div>
+      <h2 className={styles.subheading}>
+        Active character slots (1 - {activeCharacterSlots})
+      </h2>
+      {renderContent()}
     </div>
   );
 };

@@ -7,8 +7,8 @@ import styles from './CharacterCard.module.scss';
 
 interface CharacterCardProps {
   cardNumber?: number;
-  character: Character;
-  onBackup?: (character: Character) => void;
+  character: Omit<Character, 'version'>;
+  onBackup?: (character: Omit<Character, 'version'>) => void;
 }
 
 export const CharacterCard = ({

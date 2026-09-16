@@ -8,7 +8,7 @@ use std::{
     time::SystemTime,
 };
 
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize)]
 pub struct CharacterInfo {
     pub name: String,
     pub class: String,
@@ -144,8 +144,8 @@ pub fn read_underworld_character<P: AsRef<Path>>(path: P) -> Result<CharacterInf
         3 => String::from("Battle Mage"),
         4 => String::from("Dark Elf"),
         5 => String::from("Wood Elf"),
-        6 => String::from("Vampire"),
-        7 => String::from("Vampire"),
+        6 => String::from("Vampiress"),
+        7 => String::from("Vampiress"),
         8 => String::from("Dwarf"),
         9 => String::from("Daemon"),
         other => format!("Unknown({})", other),

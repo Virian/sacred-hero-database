@@ -1,4 +1,5 @@
 mod app_settings;
+mod characters;
 mod commands;
 mod save_reader;
 
@@ -43,7 +44,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             read_save_file,
             commands::get_settings,
-            commands::update_settings
+            commands::update_settings,
+            commands::get_active_characters
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

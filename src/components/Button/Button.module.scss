@@ -1,10 +1,26 @@
 @layer component {
   .button {
+    position: relative;
     padding: 0.5rem 1rem;
     border-radius: 4px;
     font-size: 1rem;
     cursor: pointer;
     transition: background-color 0.2s ease-in-out;
+  }
+
+  .content {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .loading .content {
+    visibility: hidden;
+  }
+
+  .spinner {
+    position: absolute;
+    inset: 0;
+    margin: auto;
   }
 
   .button-primary {

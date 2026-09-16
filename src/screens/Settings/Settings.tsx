@@ -2,12 +2,13 @@ import { useContext, useMemo } from 'react';
 import { Formik, type FormikHelpers } from 'formik';
 import { X, Save } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { invoke } from '@tauri-apps/api/core';
 import { open } from '@tauri-apps/plugin-dialog';
 
 import { Button, Input, RadioGroup } from '../../components';
-import { Commands } from '../../constants';
 import { SettingsContext } from '../../context';
+import { Commands } from '../../enums';
+import { useInvokeMutation } from '../../hooks';
+import type { UpdateSettingsCommandParams } from '../../types';
 
 import { validate } from './validate';
 import { characterSlotsOptions } from './Settings.constants';
@@ -16,6 +17,10 @@ import styles from './Settings.module.scss';
 
 export const Settings = () => {
   const { settings, fetchSettings } = useContext(SettingsContext);
+  const { invoke, isLoading: isUpdatingSettings } =
+    useInvokeMutation<UpdateSettingsCommandParams>({
+      command: Commands.UPDATE_SETTINGS,
+    });
 
   const initialFormValues: FormValues = useMemo(
     () => ({
@@ -27,7 +32,7 @@ export const Settings = () => {
 
   const saveSettings = async (values: FormValues) => {
     try {
-      await invoke(Commands.UPDATE_SETTINGS, {
+      await invoke({
         gameInstallationPath: values.installationPath,
         activeCharacterSlots: parseInt(values.activeCharacterSlots),
       });
@@ -98,6 +103,7 @@ export const Settings = () => {
                 type="submit"
                 className={styles.button}
                 disabled={!dirty}
+                isLoading={isUpdatingSettings}
               >
                 <span className={styles.buttonText}>
                   <Save size={16} />
