@@ -1,4 +1,4 @@
-import { ArrowUpDown } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 
 import { Button } from '../../components';
 import { CharacterClass } from '../../enums';
@@ -116,8 +116,8 @@ export const Characters = () => {
       <div className={styles.actions}>
         <Button variant="secondary">
           <span className={styles.buttonText}>
-            <ArrowUpDown size={16} />
-            Change Order
+            <RefreshCw size={16} />
+            Refresh
           </span>
         </Button>
       </div>
