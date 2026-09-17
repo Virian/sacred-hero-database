@@ -8,7 +8,7 @@ import styles from './Import.module.scss';
 export const Import = () => {
   return (
     <div className={styles.container}>
-      <h1>Import Character</h1>
+      <h1 className={styles.heading}>Import Character</h1>
       <div className={styles.dropArea}>
         <Download
           size={48}

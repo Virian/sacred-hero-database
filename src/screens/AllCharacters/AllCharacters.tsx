@@ -211,7 +211,7 @@ export const AllCharacters = () => {
 
   return (
     <div className={styles.container}>
-      <h1>All Characters</h1>
+      <h1 className={styles.heading}>All Characters</h1>
       <h2 className={styles.subheading}>
         Your characters (latest version of each)
       </h2>

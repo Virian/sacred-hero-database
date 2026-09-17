@@ -144,7 +144,7 @@ export const Characters = ({ setActiveMenuOption }: CharactersProps) => {
 
   return (
     <div className={styles.container}>
-      <h1>Characters</h1>
+      <h1 className={styles.heading}>Characters</h1>
       <h2 className={styles.subheading}>
         Active character slots (1 - {activeCharacterSlots})
       </h2>

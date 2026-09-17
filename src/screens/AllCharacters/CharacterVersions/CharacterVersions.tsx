@@ -25,6 +25,7 @@ const modifiedDateColumn: ColumnDefinition<CharacterRow, Date> = {
   id: 'modifiedAt',
   field: 'modifiedAt',
   headerLabel: 'Modified Date',
+  rowCellClass: styles.dateCell,
   cellRenderer: (value) => value.toLocaleString(),
 };
 
@@ -138,7 +139,7 @@ export const CharacterVersions = ({
         <ChevronRight size={18} />
         <span className={styles.navigationName}>{character.name}</span>
       </div>
-      <h1>Character Versions</h1>
+      <h1 className={styles.heading}>Character Versions</h1>
       <div className={styles.tableSection}>
         <CharacterTable
           className={clsx({ [styles.fullTable]: !!selectedVersion })}

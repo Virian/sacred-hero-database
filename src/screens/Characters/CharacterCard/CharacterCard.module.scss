@@ -12,6 +12,7 @@
 .content {
   display: flex;
   gap: 0.75rem;
+  overflow: hidden;
 }
 
 .cardNumber {
@@ -44,14 +45,19 @@
 .characterInfo {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .characterName {
   font-size: 0.875rem;
   font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .characterDetails {
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
   color: var(--text-secondary);
 }

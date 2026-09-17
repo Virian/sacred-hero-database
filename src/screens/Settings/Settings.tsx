@@ -86,7 +86,7 @@ export const Settings = () => {
           onSubmit={handleSubmit}
         >
           <div className={styles.header}>
-            <h1>Settings</h1>
+            <h1 className={styles.heading}>Settings</h1>
             <div className={styles.actions}>
               <Button
                 className={styles.button}

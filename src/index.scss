@@ -1,70 +1,81 @@
 :root {
   /* ===== Backgrounds ===== */
 
-  --bg-app: #07111F;          /* Main window */
-  --bg-app-glow:
-    radial-gradient(circle at top center,
-      rgba(47, 134, 255, 0.12) 0%,
-      rgba(47, 134, 255, 0.04) 35%,
-      transparent 70%);
-  --bg-sidebar: #09172A;      /* Navigation */
-  --bg-surface: #0D1D34;      /* Cards */
-  --bg-surface-hover: #12284A;
+  --bg-app: #07111f; /* Main window */
+  --bg-app-glow: radial-gradient(
+    circle at top center,
+    rgba(47, 134, 255, 0.12) 0%,
+    rgba(47, 134, 255, 0.04) 35%,
+    transparent 70%
+  );
+  --bg-sidebar: #09172a; /* Navigation */
+  --bg-surface: #0d1d34; /* Cards */
+  --bg-surface-hover: #12284a;
   --bg-surface-active: #163867;
   --bg-surface-elevated: #132746;
 
   /* ===== Borders ===== */
 
-  --border-subtle: #1A3256;
-  --border-default: #23436F;
-  --border-strong: #2E5B99;
-  --border-dashed: #315E96;
+  --border-subtle: #1a3256;
+  --border-default: #23436f;
+  --border-strong: #2e5b99;
+  --border-dashed: #315e96;
 
   /* ===== Text ===== */
 
-  --text-primary: #F2F7FF;
-  --text-secondary: #B8C8E6;
-  --text-muted: #7F96B8;
-  --text-disabled: #5A6D8C;
+  --text-primary: #f2f7ff;
+  --text-secondary: #b8c8e6;
+  --text-muted: #7f96b8;
+  --text-disabled: #5a6d8c;
 
   /* ===== Primary Accent ===== */
 
-  --accent: #2F86FF;
-  --accent-hover: #4B99FF;
-  --accent-active: #1E6FE6;
+  --accent: #2f86ff;
+  --accent-hover: #4b99ff;
+  --accent-active: #1e6fe6;
   --accent-soft: rgba(47, 134, 255, 0.15);
 
   /* ===== Status Colors ===== */
 
-  --success: #41D97A;
+  --success: #41d97a;
   --success-soft: rgba(65, 217, 122, 0.15);
 
-  --warning: #FFB02E;
+  --warning: #ffb02e;
   --warning-soft: rgba(255, 176, 46, 0.15);
 
-  --danger: #FF4D57;
-  --danger-hover: #FF6670;
+  --danger: #ff4d57;
+  --danger-hover: #ff6670;
   --danger-soft: rgba(255, 77, 87, 0.15);
 
-  --info: #59B8FF;
+  --info: #59b8ff;
   --info-soft: rgba(89, 184, 255, 0.15);
 
   /* ===== Interactive ===== */
 
-  --focus-ring: #62A7FF;
+  --focus-ring: #62a7ff;
   --selection: rgba(47, 134, 255, 0.25);
 
   /* ===== Inputs ===== */
 
-  --input-bg: #0A182D;
-  --input-border: #27456E;
-  --input-border-focus: #3A8CFF;
-  --input-placeholder: #6F86A8;
+  --input-bg: #0a182d;
+  --input-border: #27456e;
+  --input-border-focus: #3a8cff;
+  --input-placeholder: #6f86a8;
 
   /* ===== Scrollbar ===== */
 
-  --scrollbar: #23436F;
-  --scrollbar-hover: #32629E;
+  --scrollbar: #23436f;
+  --scrollbar-hover: #32629e;
+
+  /* ===== Fonts ===== */
+
+  --font-inter: Inter, sans-serif;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/src/assets//fonts/Inter.ttf') format('truetype');
+  font-style: normal;
 }
 
 :root {
@@ -83,10 +94,12 @@
   -webkit-text-size-adjust: 100%;
 }
 
-body, html, #root, #app {
+body,
+html,
+#root,
+#app {
   width: 100%;
   height: 100%;
   margin: 0;
   overflow: hidden;
 }
-

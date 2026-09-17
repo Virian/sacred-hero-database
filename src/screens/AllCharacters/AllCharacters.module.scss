@@ -6,6 +6,11 @@
   overflow: hidden;
 }
 
+.heading {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
 .subheading {
   color: var(--text-secondary);
   font-size: 0.875rem;
@@ -41,6 +46,7 @@
 
 .numberCell {
   text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 
 .characterCount {
@@ -59,5 +65,3 @@
   flex-direction: column;
   gap: 0.5rem;
 }
-
-
