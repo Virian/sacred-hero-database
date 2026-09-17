@@ -64,8 +64,8 @@
 
   /* ===== Scrollbar ===== */
 
-  --scrollbar: #23436f;
-  --scrollbar-hover: #32629e;
+  --scrollbar-track: #081525;
+  --scrollbar-thumb: #27456e;
 
   /* ===== Fonts ===== */
 
@@ -81,7 +81,7 @@
 :root {
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
   font-size: 16px;
-  line-height: 24px;
+  line-height: 1.5;
   font-weight: 400;
 
   color: var(--text-primary);
@@ -92,6 +92,9 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
 body,
