@@ -1,6 +1,10 @@
 use serde_json::{Map, Value};
+use std::path::Path;
 use tokio::fs;
 use tokio::sync::Mutex;
+
+#[cfg(test)]
+mod tests;
 
 #[derive(Default)]
 pub struct SettingsState {
@@ -8,7 +12,10 @@ pub struct SettingsState {
 }
 
 pub async fn initialize_settings(state: &SettingsState) -> Result<(), String> {
-    let settings = load_settings().await;
+    let settings = match settings_path() {
+        Ok(path) => load_settings(&path).await,
+        Err(error) => Err(error),
+    };
     let initialization_result = settings.as_ref().map(|_| ()).map_err(Clone::clone);
 
     *state.settings.lock().await = Some(settings);
@@ -38,19 +45,8 @@ pub async fn update_settings(
         None => return Err("Settings have not been initialized.".to_string()),
     };
 
-    let mut updated_settings = settings;
-    let settings_object = updated_settings
-        .as_object_mut()
-        .ok_or_else(|| "settings.json must contain a JSON object.".to_string())?;
-
-    settings_object.insert(
-        "gameInstallationPath".to_string(),
-        Value::String(game_installation_path),
-    );
-    settings_object.insert(
-        "activeCharacterSlots".to_string(),
-        Value::from(active_character_slots),
-    );
+    let updated_settings =
+        update_settings_value(settings, game_installation_path, active_character_slots)?;
 
     let contents =
         serde_json::to_string_pretty(&updated_settings).map_err(|error| error.to_string())?;
@@ -63,34 +59,23 @@ pub async fn update_settings(
     Ok(())
 }
 
-async fn load_settings() -> Result<Value, String> {
-    let settings_path = settings_path()?;
-
-    let mut settings: Value = match fs::read_to_string(&settings_path).await {
+async fn load_settings(settings_path: &Path) -> Result<Value, String> {
+    let settings: Value = match fs::read_to_string(settings_path).await {
         Ok(contents) => serde_json::from_str(&contents).map_err(|error| error.to_string())?,
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => Value::Object(Map::new()),
         Err(error) => return Err(error.to_string()),
     };
 
+    let mut settings = apply_defaults(settings)?;
     let settings_object = settings
         .as_object_mut()
-        .ok_or_else(|| "settings.json must contain a JSON object.".to_string())?;
-
-    settings_object
-        .entry("gameInstallationPath")
-        .or_insert_with(|| Value::String(String::new()));
-    settings_object
-        .entry("activeCharacterSlots")
-        .or_insert_with(|| Value::from(8));
-    settings_object
-        .entry("triedDetectingGamePath")
-        .or_insert_with(|| Value::Bool(false));
+        .expect("apply_defaults returns an object");
 
     let should_detect_game_path = settings_object
         .get("triedDetectingGamePath")
         .and_then(Value::as_bool)
         == Some(false)
-        && (matches!(settings_object.get("gameInstallationPath"), None)
+        && (settings_object.get("gameInstallationPath").is_none()
             || matches!(
                 settings_object.get("gameInstallationPath"),
                 Some(Value::String(path)) if path.is_empty()
@@ -109,9 +94,48 @@ async fn load_settings() -> Result<Value, String> {
     settings_object.insert("triedDetectingGamePath".to_string(), Value::Bool(true));
 
     let contents = serde_json::to_string_pretty(&settings).map_err(|error| error.to_string())?;
-    fs::write(&settings_path, contents)
+    fs::write(settings_path, contents)
         .await
         .map_err(|error| error.to_string())?;
+
+    Ok(settings)
+}
+
+fn apply_defaults(mut settings: Value) -> Result<Value, String> {
+    let settings_object = settings
+        .as_object_mut()
+        .ok_or_else(|| "settings.json must contain a JSON object.".to_string())?;
+
+    settings_object
+        .entry("gameInstallationPath")
+        .or_insert_with(|| Value::String(String::new()));
+    settings_object
+        .entry("activeCharacterSlots")
+        .or_insert_with(|| Value::from(8));
+    settings_object
+        .entry("triedDetectingGamePath")
+        .or_insert_with(|| Value::Bool(false));
+
+    Ok(settings)
+}
+
+fn update_settings_value(
+    mut settings: Value,
+    game_installation_path: String,
+    active_character_slots: u32,
+) -> Result<Value, String> {
+    let settings_object = settings
+        .as_object_mut()
+        .ok_or_else(|| "settings.json must contain a JSON object.".to_string())?;
+
+    settings_object.insert(
+        "gameInstallationPath".to_string(),
+        Value::String(game_installation_path),
+    );
+    settings_object.insert(
+        "activeCharacterSlots".to_string(),
+        Value::from(active_character_slots),
+    );
 
     Ok(settings)
 }

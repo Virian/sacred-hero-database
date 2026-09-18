@@ -2,11 +2,13 @@ use anyhow::{bail, Context, Result};
 use byteorder::{LittleEndian, ReadBytesExt};
 use std::{
     fs,
-    fs::File,
     io::{Cursor, Read, Seek, SeekFrom},
     path::Path,
     time::SystemTime,
 };
+
+#[cfg(test)]
+mod tests;
 
 #[derive(Debug, serde::Serialize)]
 pub struct CharacterInfo {
@@ -50,7 +52,12 @@ pub fn read_underworld_character<P: AsRef<Path>>(path: P) -> Result<CharacterInf
     let metadata = fs::metadata(path)?;
     let modified = metadata.modified()?;
 
-    let mut file = File::open(path)?;
+    let data = fs::read(path)?;
+    parse_character(&data, modified)
+}
+
+fn parse_character(data: &[u8], modified: SystemTime) -> Result<CharacterInfo> {
+    let mut file = Cursor::new(data);
 
     // PAX header (256 bytes)
     let mut header = [0u8; 256];
