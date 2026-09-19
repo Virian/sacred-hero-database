@@ -35,6 +35,9 @@
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
+  // padding to make space for button outline visible on focus
+  // needs to be here because `.content` class has `overflow: hidden`
+  padding: 0 2px 2px;
 }
 
 .button {
