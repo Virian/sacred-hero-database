@@ -1,6 +1,6 @@
-import { Save } from 'lucide-react';
+import { Save, X } from 'lucide-react';
 
-import { Button, CharacterPortrait } from '../../../components';
+import { Button, CharacterPortrait, IconButton } from '../../../components';
 import { Character } from '../../../types';
 import { formatTime } from '../../../utils';
 import styles from './CharacterCard.module.scss';
@@ -9,21 +9,33 @@ interface CharacterCardProps {
   cardNumber?: number;
   character: Omit<Character, 'version'>;
   onBackup?: (character: Omit<Character, 'version'>) => void;
+  onRemove?: (character: Omit<Character, 'version'>) => void;
 }
 
 export const CharacterCard = ({
   cardNumber,
   character,
   onBackup,
+  onRemove,
 }: CharacterCardProps) => {
   const handleBackup = () => {
     onBackup?.(character);
+  };
+
+  const handleRemove = () => {
+    onRemove?.(character);
   };
 
   return (
     <div className={styles.card}>
       <div className={styles.content}>
         <span className={styles.cardNumber}>{cardNumber}</span>
+        <IconButton
+          className={styles.removeButton}
+          onClick={handleRemove}
+        >
+          <X size={16} />
+        </IconButton>
 
         <div className={styles.leftSection}>
           <CharacterPortrait
