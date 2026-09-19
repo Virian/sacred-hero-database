@@ -6,12 +6,14 @@ import { Spinner } from '../Spinner/Spinner';
 import styles from './Button.module.scss';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  contentClassName?: string;
   variant?: 'primary' | 'secondary' | 'danger';
   isLoading?: boolean;
 }
 
 export const Button = ({
-  className,
+  className = '',
+  contentClassName = '',
   children,
   variant = 'primary',
   type = 'button',
@@ -30,7 +32,7 @@ export const Button = ({
     type={type}
     disabled={disabled || isLoading}
   >
-    <span className={styles.content}>{children}</span>
+    <span className={clsx(styles.content, contentClassName)}>{children}</span>
     {isLoading && (
       <Spinner
         className={styles.spinner}
