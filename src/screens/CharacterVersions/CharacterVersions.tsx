@@ -1,14 +1,17 @@
 import { useState } from 'react';
+import { Link, useNavigate } from 'react-router';
 import clsx from 'clsx';
 import { ChevronRight } from 'lucide-react';
 
 import {
   Button,
+  CharacterOverview,
   CharacterTable,
   type ColumnDefinition,
-} from '../../../components';
-import { CharacterClass } from '../../../enums';
-import { CharacterOverview } from '../CharacterOverview/CharacterOverview';
+} from '../../components';
+import { Routes } from '../../constants';
+import { CharacterClass } from '../../enums';
+
 import styles from './CharacterVersions.module.scss';
 
 interface CharacterRow {
@@ -102,19 +105,14 @@ const MOCK_CHARACTERS: CharacterRow[] = [
   },
 ];
 
-interface CharacterVersionsProps {
-  character: {
-    id: string;
-    name: string;
-    characterClass: CharacterClass;
-  };
-  onBack: () => void;
-}
+const MOCK_CURRENT_CHARACTER = {
+  name: 'Ares',
+  characterClass: CharacterClass.GLADIATOR,
+};
 
-export const CharacterVersions = ({
-  character,
-  onBack: handleBack,
-}: CharacterVersionsProps) => {
+export const CharacterVersions = () => {
+  const navigate = useNavigate();
+
   const [selectedVersion, setSelectedVersion] = useState<CharacterRow | null>(
     null,
   );
@@ -129,15 +127,16 @@ export const CharacterVersions = ({
   return (
     <div className={styles.container}>
       <div className={styles.navigation}>
-        <a
+        <Link
+          to={`/${Routes.ALL_CHARACTERS}`}
           className={styles.link}
-          href="#"
-          onClick={handleBack}
         >
           All Characters
-        </a>
+        </Link>
         <ChevronRight size={18} />
-        <span className={styles.navigationName}>{character.name}</span>
+        <span className={styles.navigationName}>
+          {MOCK_CURRENT_CHARACTER.name}
+        </span>
       </div>
       <h1 className={styles.heading}>Character Versions</h1>
       <div className={styles.tableSection}>
@@ -154,8 +153,8 @@ export const CharacterVersions = ({
           <CharacterOverview
             className={styles.overview}
             id={selectedVersion.id}
-            name={character.name}
-            characterClass={character.characterClass}
+            name={MOCK_CURRENT_CHARACTER.name}
+            characterClass={MOCK_CURRENT_CHARACTER.characterClass}
             level={selectedVersion.level}
             overviewText={
               selectedVersion.isLatest
@@ -170,7 +169,7 @@ export const CharacterVersions = ({
       <Button
         className={styles.backButton}
         variant="secondary"
-        onClick={handleBack}
+        onClick={() => navigate(-1)}
       >
         Back
       </Button>

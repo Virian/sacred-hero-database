@@ -1,17 +1,61 @@
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router';
 import { ToastContainer } from 'react-toastify';
 
-import { ErrorBoundary } from './components';
+import { AppLayout, ErrorBoundary } from './components';
+import { Routes as RouteDefinitions } from './constants';
 import { SettingsProvider } from './context';
-import { AppContent } from './AppContent';
+import {
+  AllCharacters,
+  Characters,
+  CharacterVersions,
+  Import,
+  Settings,
+} from './screens';
 
 function App() {
   return (
-    <ErrorBoundary>
-      <SettingsProvider>
-        <AppContent />
-        <ToastContainer />
-      </SettingsProvider>
-    </ErrorBoundary>
+    <BrowserRouter>
+      <ErrorBoundary>
+        <SettingsProvider>
+          <Routes>
+            <Route element={<AppLayout />}>
+              <Route
+                path={RouteDefinitions.CHARACTERS}
+                element={<Characters />}
+              />
+              <Route path={RouteDefinitions.ALL_CHARACTERS}>
+                <Route
+                  index
+                  element={<AllCharacters />}
+                />
+                <Route
+                  path={RouteDefinitions.CHARACTER_VERSIONS}
+                  element={<CharacterVersions />}
+                />
+              </Route>
+              <Route
+                path={RouteDefinitions.IMPORT}
+                element={<Import />}
+              />
+              <Route
+                path={RouteDefinitions.SETTINGS}
+                element={<Settings />}
+              />
+              <Route
+                path="*"
+                element={
+                  <Navigate
+                    to={RouteDefinitions.CHARACTERS}
+                    replace
+                  />
+                }
+              />
+            </Route>
+          </Routes>
+          <ToastContainer />
+        </SettingsProvider>
+      </ErrorBoundary>
+    </BrowserRouter>
   );
 }
 

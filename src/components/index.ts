@@ -1,5 +1,7 @@
+export { AppLayout } from './AppLayout/AppLayout';
 export { Badge } from './Badge/Badge';
 export { Button } from './Button/Button';
+export { CharacterOverview } from './CharacterOverview/CharacterOverview';
 export { CharacterPortrait } from './CharacterPortrait/CharacterPortrait';
 export {
   CharacterTable,

@@ -1,4 +1,5 @@
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
+import { Outlet } from 'react-router';
 import {
   Users,
   BookUser,
@@ -8,36 +9,17 @@ import {
 } from 'lucide-react';
 import { Tooltip } from 'react-tooltip';
 
-import { Badge, Menu, MenuOption, SettingsError, Spinner } from './components';
-import { SettingsContext } from './context';
-import { MenuOptions } from './enums';
-import { AllCharacters, Characters, Import, Settings } from './screens';
+import { Badge, Menu, MenuOption, SettingsError, Spinner } from '../';
+import { Routes } from '../../constants';
+import { SettingsContext } from '../../context';
 
-import styles from './AppContent.module.scss';
+import styles from './AppLayout.module.scss';
 
-export const AppContent = () => {
+export const AppLayout = () => {
   const { settings, isInitialized, initializationError } =
     useContext(SettingsContext);
-  const [activeMenuOption, setActiveMenuOption] = useState<MenuOptions>(
-    MenuOptions.CHARACTERS,
-  );
 
   const isGameInstallationPathMissing = !settings.gameInstallationPath;
-
-  const renderActiveScreen = () => {
-    switch (activeMenuOption) {
-      case MenuOptions.CHARACTERS:
-        return <Characters setActiveMenuOption={setActiveMenuOption} />;
-      case MenuOptions.ALL_CHARACTERS:
-        return <AllCharacters />;
-      case MenuOptions.IMPORT:
-        return <Import />;
-      case MenuOptions.SETTINGS:
-        return <Settings />;
-      default:
-        return null;
-    }
-  };
 
   if (!isInitialized) {
     return (
@@ -58,28 +40,24 @@ export const AppContent = () => {
         <Menu>
           <MenuOption
             icon={Users}
+            route={`/${Routes.CHARACTERS}`}
             label="Characters"
-            isActive={activeMenuOption === MenuOptions.CHARACTERS}
-            onClick={() => setActiveMenuOption(MenuOptions.CHARACTERS)}
           />
           <MenuOption
             icon={BookUser}
+            route={`/${Routes.ALL_CHARACTERS}`}
             label="All Characters"
-            isActive={activeMenuOption === MenuOptions.ALL_CHARACTERS}
-            onClick={() => setActiveMenuOption(MenuOptions.ALL_CHARACTERS)}
             rightContent={<Badge>12</Badge>}
           />
           <MenuOption
             icon={Download}
+            route={`/${Routes.IMPORT}`}
             label="Import"
-            isActive={activeMenuOption === MenuOptions.IMPORT}
-            onClick={() => setActiveMenuOption(MenuOptions.IMPORT)}
           />
           <MenuOption
             icon={SettingsIcon}
+            route={`/${Routes.SETTINGS}`}
             label="Settings"
-            isActive={activeMenuOption === MenuOptions.SETTINGS}
-            onClick={() => setActiveMenuOption(MenuOptions.SETTINGS)}
             rightContent={
               isGameInstallationPathMissing && (
                 <TriangleAlert
@@ -94,7 +72,9 @@ export const AppContent = () => {
           />
         </Menu>
       </nav>
-      <main className={styles.main}>{renderActiveScreen()}</main>
+      <main className={styles.main}>
+        <Outlet />
+      </main>
       <Tooltip id="settings-warning" />
     </div>
   );

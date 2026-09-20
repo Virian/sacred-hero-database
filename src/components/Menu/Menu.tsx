@@ -5,5 +5,5 @@ interface MenuProps {
 }
 
 export const Menu = ({ children }: MenuProps) => (
-  <ul className={styles.list}>{children}</ul>
+  <div className={styles.menu}>{children}</div>
 );

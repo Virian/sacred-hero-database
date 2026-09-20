@@ -1,15 +1,17 @@
-import { useContext, useMemo, type Dispatch, type SetStateAction } from 'react';
+import { useContext, useMemo } from 'react';
+import { Link } from 'react-router';
 import { CircleX, RefreshCw } from 'lucide-react';
 
 import { Button, Spinner } from '../../components';
 import { SettingsContext } from '../../context';
-import { CharacterClass, Commands, MenuOptions } from '../../enums';
+import { CharacterClass, Commands } from '../../enums';
 import { useInvokeQuery } from '../../hooks';
 import type { GetActiveCharactersCommandResponse } from '../../types';
 
 import { CharacterCard, EmptyCharacterCard } from './CharacterCard';
 import { stripCharacterFormatting } from './stripCharacterFormatting';
 import styles from './Characters.module.scss';
+import { Routes } from '../../constants';
 
 interface ActiveCharacter {
   id: string;
@@ -23,12 +25,7 @@ interface ActiveCharacter {
   modifiedAt: Date;
 }
 
-interface CharactersProps {
-  // TODO: replace with react-router
-  setActiveMenuOption: Dispatch<SetStateAction<MenuOptions>>;
-}
-
-export const Characters = ({ setActiveMenuOption }: CharactersProps) => {
+export const Characters = () => {
   const {
     settings: { gameInstallationPath, activeCharacterSlots },
   } = useContext(SettingsContext);
@@ -72,10 +69,6 @@ export const Characters = ({ setActiveMenuOption }: CharactersProps) => {
     });
   }, [activeCharacterSlots, data]);
 
-  const goToSettings = () => {
-    setActiveMenuOption(MenuOptions.SETTINGS);
-  };
-
   const renderContent = () => {
     if (!gameInstallationPath) {
       return (
@@ -87,13 +80,12 @@ export const Characters = ({ setActiveMenuOption }: CharactersProps) => {
           <span>Could not load active characters.</span>
           <span className={styles.errorDescription}>
             Set your game installation path in{' '}
-            <a
-              href="#"
+            <Link
+              to={`/${Routes.SETTINGS}`}
               className={styles.link}
-              onClick={goToSettings}
             >
               Settings
-            </a>{' '}
+            </Link>{' '}
             to load your active characters.
           </span>
         </div>

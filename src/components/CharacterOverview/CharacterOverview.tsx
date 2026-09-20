@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 
-import { Button, CharacterPortrait } from '../../../components';
-import type { Character } from '../../../types';
+import { Button, CharacterPortrait } from '../';
+import type { Character } from '../../types';
 
 import styles from './CharacterOverview.module.scss';
 

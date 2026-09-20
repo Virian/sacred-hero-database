@@ -1,3 +1,5 @@
+export * from './routes';
+
 export const CharacterSlots = {
   UNDERWORLD: 8,
   PLUS: 6,

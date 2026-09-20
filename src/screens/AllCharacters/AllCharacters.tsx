@@ -1,16 +1,17 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router';
 
 import {
+  CharacterOverview,
   CharacterPortrait,
   CharacterTable,
   type ColumnDefinition,
 } from '../../components';
+import { Routes } from '../../constants';
 import { CharacterClass } from '../../enums';
 import type { Character } from '../../types';
 
-import { CharacterOverview } from './CharacterOverview/CharacterOverview';
 import { CharacterDetails } from './CharacterDetails/CharacterDetails';
-import { CharacterVersions } from './CharacterVersions/CharacterVersions';
 import styles from './AllCharacters.module.scss';
 
 interface CharacterRow {
@@ -178,11 +179,10 @@ const MOCK_CHARACTERS: CharacterWithVersionCount[] = [
 ];
 
 export const AllCharacters = () => {
+  const navigate = useNavigate();
+
   const [selectedCharacter, setSelectedCharacter] =
     useState<CharacterWithVersionCount | null>(null);
-  const [characterIdBrowseVersions, setCharacterIdBrowseVersions] = useState<
-    string | null
-  >(null);
 
   const handleRowClick = (characterId: string) => {
     const clickedCharacter = MOCK_CHARACTERS.find(
@@ -192,22 +192,13 @@ export const AllCharacters = () => {
   };
 
   const handleViewVersions = (id: string) => {
-    setCharacterIdBrowseVersions(id);
-  };
-
-  const handleBackFromVersions = () => {
-    setSelectedCharacter(null);
-    setCharacterIdBrowseVersions(null);
-  };
-
-  if (characterIdBrowseVersions && selectedCharacter) {
-    return (
-      <CharacterVersions
-        character={selectedCharacter}
-        onBack={handleBackFromVersions}
-      />
+    navigate(
+      `/${Routes.ALL_CHARACTERS}/${Routes.CHARACTER_VERSIONS}`.replace(
+        ':characterId',
+        id,
+      ),
     );
-  }
+  };
 
   return (
     <div className={styles.container}>
