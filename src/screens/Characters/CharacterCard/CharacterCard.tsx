@@ -1,7 +1,7 @@
 import { Save, X } from 'lucide-react';
 
 import { Button, CharacterPortrait, IconButton } from '../../../components';
-import { Character } from '../../../types';
+import type { Character } from '../../../types';
 import { formatTime } from '../../../utils';
 import styles from './CharacterCard.module.scss';
 
