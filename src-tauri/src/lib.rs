@@ -1,6 +1,7 @@
 mod app_settings;
 mod characters;
 mod commands;
+mod database;
 mod save_reader;
 
 use tauri::Manager;
@@ -12,6 +13,10 @@ pub fn run() {
         .plugin(tauri_plugin_process::init())
         .manage(app_settings::SettingsState::default())
         .setup(|app| {
+            let database = tauri::async_runtime::block_on(database::initialize(app.handle()))
+                .expect("failed to initialize database");
+            app.manage(database);
+
             let settings_state = app.state::<app_settings::SettingsState>();
 
             if let Err(error) =
