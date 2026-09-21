@@ -71,23 +71,25 @@ async fn load_settings(settings_path: &Path) -> Result<Value, String> {
         .as_object_mut()
         .expect("apply_defaults returns an object");
 
-    let should_detect_game_path = settings_object
-        .get("triedDetectingGamePath")
-        .and_then(Value::as_bool)
-        == Some(false)
-        && (settings_object.get("gameInstallationPath").is_none()
-            || matches!(
-                settings_object.get("gameInstallationPath"),
-                Some(Value::String(path)) if path.is_empty()
-            ));
-
     #[cfg(windows)]
-    if should_detect_game_path {
-        if let Some(game_installation_path) = detect_game_installation_path().await {
-            settings_object.insert(
-                "gameInstallationPath".to_string(),
-                Value::String(game_installation_path),
-            );
+    {
+        let should_detect_game_path = settings_object
+            .get("triedDetectingGamePath")
+            .and_then(Value::as_bool)
+            == Some(false)
+            && (settings_object.get("gameInstallationPath").is_none()
+                || matches!(
+                    settings_object.get("gameInstallationPath"),
+                    Some(Value::String(path)) if path.is_empty()
+                ));
+
+        if should_detect_game_path {
+            if let Some(game_installation_path) = detect_game_installation_path().await {
+                settings_object.insert(
+                    "gameInstallationPath".to_string(),
+                    Value::String(game_installation_path),
+                );
+            }
         }
     }
 
