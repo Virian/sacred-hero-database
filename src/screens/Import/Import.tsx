@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { open } from '@tauri-apps/plugin-dialog';
 
-import { Button, CharacterPortrait } from '../../components';
+import { Button, CharacterPortrait, Spinner } from '../../components';
 import { CharacterClass } from '../../enums';
 
 import styles from './Import.module.scss';
@@ -15,6 +15,16 @@ export const Import = () => {
   const dropAreaRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+
+  // The Tauri listener is registered once, so the ref provides its current loading state
+  // while the setter keeps that ref and the rendered React state synchronized.
+  const isImportingRef = useRef(false);
+
+  const setImporting = (value: boolean) => {
+    isImportingRef.current = value;
+    setIsImporting(value);
+  };
 
   useEffect(() => {
     const webview = getCurrentWebviewWindow();
@@ -24,6 +34,10 @@ export const Import = () => {
 
     webview
       .onDragDropEvent((event) => {
+        if (isImportingRef.current) {
+          return;
+        }
+
         if (event.payload.type === 'enter') {
           setIsDragging(true);
           setIsDragOver(false);
@@ -77,7 +91,9 @@ export const Import = () => {
             return;
           }
 
-          // TODO: invoke import
+          setImporting(true);
+
+          // TODO: invoke import and setImporting(false) when it finishes.
         }
       })
       .then((removeListener) => {
@@ -96,6 +112,10 @@ export const Import = () => {
   }, []);
 
   const handleBrowse = async () => {
+    if (isImportingRef.current) {
+      return;
+    }
+
     const filePaths = await open({
       multiple: true,
       directory: false,
@@ -106,7 +126,9 @@ export const Import = () => {
       return;
     }
 
-    // TODO: invoke import
+    setImporting(true);
+
+    // TODO: invoke import and setImporting(false) when it finishes.
   };
 
   return (
@@ -114,11 +136,18 @@ export const Import = () => {
       <h1 className={styles.heading}>Import Character</h1>
       <div
         ref={dropAreaRef}
+        aria-busy={isImporting}
         className={clsx(styles.dropArea, {
           [styles.dragging]: isDragging && !isDragOver,
           [styles.dragOver]: isDragOver,
         })}
       >
+        {isImporting && (
+          <div className={styles.loadingOverlay}>
+            <Spinner label="Importing characters" />
+            <span>Importing characters...</span>
+          </div>
+        )}
         <Download
           size={48}
           className={styles.importIcon}
