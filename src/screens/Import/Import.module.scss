@@ -22,6 +22,16 @@
   background-color: var(--bg-surface);
 }
 
+.dragging {
+  border-color: var(--accent-muted);
+  background-color: var(--bg-surface-hover);
+}
+
+.dragOver {
+  border-color: var(--accent);
+  background-color: var(--accent-muted);
+}
+
 .importIcon {
   color: var(--accent);
 }
