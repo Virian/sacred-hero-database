@@ -1,4 +1,5 @@
 mod app_settings;
+mod character_repository;
 mod characters;
 mod commands;
 mod database;

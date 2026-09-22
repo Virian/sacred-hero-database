@@ -1,7 +1,7 @@
-use crate::save_reader;
+use crate::{character_repository, save_reader};
 use chrono::{DateTime, Utc};
 use serde::Serialize;
-use sqlx::{Sqlite, SqlitePool, Transaction};
+use sqlx::SqlitePool;
 use std::{path::Path, time::SystemTime};
 use tauri::{AppHandle, Manager};
 use uuid::Uuid;
@@ -85,26 +85,26 @@ async fn import_one(
         .await
         .map_err(|error| format!("Could not start database transaction: {error}"))?;
 
-    let character_id = find_character_id(&mut transaction, &normalized_name, &character.class)
-        .await
-        .map_err(|error| format!("Could not find character: {error}"))?;
+    let character_id = character_repository::find_character_id_by_class(
+        &mut transaction,
+        &normalized_name,
+        &character.class,
+    )
+    .await
+    .map_err(|error| format!("Could not find character: {error}"))?;
 
     let character_id = match character_id {
         Some(id) => id,
-        None => {
-            let id = Uuid::new_v4().to_string();
-            sqlx::query("INSERT INTO characters (id, name, class) VALUES (?, ?, ?)")
-                .bind(&id)
-                .bind(&character.name)
-                .bind(&character.class)
-                .execute(&mut *transaction)
-                .await
-                .map_err(|error| format!("Could not insert character: {error}"))?;
-            id
-        }
+        None => character_repository::insert_character(
+            &mut transaction,
+            &character.name,
+            &character.class,
+        )
+        .await
+        .map_err(|error| format!("Could not insert character: {error}"))?,
     };
 
-    if version_with_play_time_exists(
+    if character_repository::version_with_play_time_exists(
         &mut transaction,
         &character_id,
         character.play_time.as_secs() as i64,
@@ -136,7 +136,7 @@ async fn import_one(
         return Err(format!("Could not copy save file: {error}"));
     }
 
-    if let Err(error) = insert_version(
+    if let Err(error) = character_repository::insert_version(
         &mut transaction,
         &version_id,
         &character_id,
@@ -180,84 +180,6 @@ async fn cleanup_destination(
     }
 }
 
-async fn find_character_id(
-    transaction: &mut Transaction<'_, Sqlite>,
-    name: &str,
-    class: &str,
-) -> Result<Option<String>, sqlx::Error> {
-    let characters: Vec<(String, String, String)> =
-        sqlx::query_as("SELECT id, name, class FROM characters WHERE class = ?")
-            .bind(class)
-            .fetch_all(&mut **transaction)
-            .await?;
-
-    Ok(characters
-        .into_iter()
-        .find_map(|(id, stored_name, stored_class)| {
-            (strip_character_formatting(&stored_name) == name && stored_class == class)
-                .then_some(id)
-        }))
-}
-
-async fn version_with_play_time_exists(
-    transaction: &mut Transaction<'_, Sqlite>,
-    character_id: &str,
-    play_time_seconds: i64,
-) -> Result<bool, sqlx::Error> {
-    let exists: i64 = sqlx::query_scalar(
-        "SELECT EXISTS(
-            SELECT 1
-            FROM character_versions
-            WHERE character_id = ? AND play_time_seconds = ?
-        )",
-    )
-    .bind(character_id)
-    .bind(play_time_seconds)
-    .fetch_one(&mut **transaction)
-    .await?;
-
-    Ok(exists != 0)
-}
-
-async fn insert_version(
-    transaction: &mut Transaction<'_, Sqlite>,
-    version_id: &str,
-    character_id: &str,
-    character: &save_reader::CharacterInfo,
-    modified_at: &str,
-    created_at: &str,
-) -> Result<(), String> {
-    let version_number: i64 = sqlx::query_scalar(
-        "SELECT COALESCE(MAX(version_number), 0) + 1 FROM character_versions WHERE character_id = ?",
-    )
-    .bind(character_id)
-    .fetch_one(&mut **transaction)
-    .await
-    .map_err(|error| format!("Could not determine version number: {error}"))?;
-
-    sqlx::query(
-        "INSERT INTO character_versions (
-            id, version_number, character_id, level, hardcore, deaths,
-            survival_bonus, play_time_seconds, modified_at, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-    )
-    .bind(version_id)
-    .bind(version_number)
-    .bind(character_id)
-    .bind(i64::from(character.level))
-    .bind(i64::from(character.hardcore))
-    .bind(i64::from(character.revivals))
-    .bind(i64::from(character.survival_bonus))
-    .bind(character.play_time.as_secs() as i64)
-    .bind(modified_at)
-    .bind(created_at)
-    .execute(&mut **transaction)
-    .await
-    .map_err(|error| format!("Could not insert character version: {error}"))?;
-
-    Ok(())
-}
-
 fn system_time_iso(time: SystemTime) -> String {
     DateTime::<Utc>::from(time).to_rfc3339()
 }
@@ -290,22 +212,4 @@ fn strip_character_formatting(value: &str) -> String {
     }
 
     result
-}
-
-#[cfg(test)]
-mod tests {
-    use super::strip_character_formatting;
-
-    #[test]
-    fn strips_supported_character_formatting_codes() {
-        assert_eq!(
-            strip_character_formatting(r"\c12345678Hero\g1234567890123456\r"),
-            "Hero"
-        );
-    }
-
-    #[test]
-    fn preserves_incomplete_formatting_codes() {
-        assert_eq!(strip_character_formatting(r"Hero\c123"), r"Hero\c123");
-    }
 }
