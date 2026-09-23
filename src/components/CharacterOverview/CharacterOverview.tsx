@@ -1,21 +1,23 @@
 import clsx from 'clsx';
+import isNil from 'lodash/isNil';
 
 import { Button, CharacterPortrait } from '../';
-import type { Character } from '../../types';
+import type { CharacterClass } from '../../enums';
 
 import styles from './CharacterOverview.module.scss';
 
-type CharacterOverviewProps = Pick<
-  Character,
-  'id' | 'characterClass' | 'name' | 'level'
-> & {
+interface CharacterOverviewProps {
+  id: string;
+  characterClass: CharacterClass;
+  name: string;
+  level?: number;
   className?: string;
   levelLabel?: string;
   overviewText?: string;
   onActivate?: (id: string) => void;
   onViewVersions?: (id: string) => void;
   onDelete?: (id: string) => void;
-};
+}
 
 export const CharacterOverview = ({
   className = '',
@@ -43,8 +45,8 @@ export const CharacterOverview = ({
         <div className={styles.overviewTextInformationContainer}>
           <h4>{name}</h4>
           <p className={styles.overviewText}>
-            {characterClass} · {levelLabel}
-            {level}
+            {characterClass}
+            {isNil(level) ? '' : ` · ${levelLabel}${level}`}
           </p>
           {overviewText && (
             <p className={styles.overviewText}>{overviewText}</p>
