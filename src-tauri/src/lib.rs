@@ -1,7 +1,9 @@
 mod app_settings;
+mod character_repository;
 mod characters;
 mod commands;
 mod database;
+mod imports;
 mod save_reader;
 
 use tauri::Manager;
@@ -31,7 +33,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::get_settings,
             commands::update_settings,
-            commands::get_active_characters
+            commands::get_active_characters,
+            commands::import_characters
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
