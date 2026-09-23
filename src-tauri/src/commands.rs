@@ -12,11 +12,13 @@ pub async fn get_settings(
 
 #[tauri::command]
 pub async fn update_settings(
+    app: tauri::AppHandle,
     state: tauri::State<'_, app_settings::SettingsState>,
     game_installation_path: String,
     active_character_slots: u32,
 ) -> Result<(), String> {
-    app_settings::update_settings(&state, game_installation_path, active_character_slots).await
+    app_settings::update_settings(&app, &state, game_installation_path, active_character_slots)
+        .await
 }
 
 #[tauri::command]

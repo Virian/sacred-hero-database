@@ -1,5 +1,6 @@
 use serde_json::{Map, Value};
 use std::path::Path;
+use tauri::Manager;
 use tokio::fs;
 use tokio::sync::Mutex;
 
@@ -11,9 +12,22 @@ pub struct SettingsState {
     settings: Mutex<Option<Result<Value, String>>>,
 }
 
-pub async fn initialize_settings(state: &SettingsState) -> Result<(), String> {
-    let settings = match settings_path() {
-        Ok(path) => load_settings(&path).await,
+pub async fn initialize_settings(
+    app: &tauri::AppHandle,
+    state: &SettingsState,
+) -> Result<(), String> {
+    let settings = match settings_path(app) {
+        Ok(path) => {
+            if let Some(config_dir) = path.parent() {
+                if let Err(error) = fs::create_dir_all(config_dir).await {
+                    Err(error.to_string())
+                } else {
+                    load_settings(&path).await
+                }
+            } else {
+                Err("The settings directory could not be determined.".to_string())
+            }
+        }
         Err(error) => Err(error),
     };
     let initialization_result = settings.as_ref().map(|_| ()).map_err(Clone::clone);
@@ -34,6 +48,7 @@ pub async fn get_settings(state: &SettingsState) -> Result<Value, String> {
 }
 
 pub async fn update_settings(
+    app: &tauri::AppHandle,
     state: &SettingsState,
     game_installation_path: String,
     active_character_slots: u32,
@@ -50,7 +65,8 @@ pub async fn update_settings(
 
     let contents =
         serde_json::to_string_pretty(&updated_settings).map_err(|error| error.to_string())?;
-    fs::write(settings_path()?, contents)
+    let settings_path = settings_path(app)?;
+    fs::write(settings_path, contents)
         .await
         .map_err(|error| error.to_string())?;
 
@@ -142,13 +158,12 @@ fn update_settings_value(
     Ok(settings)
 }
 
-fn settings_path() -> Result<std::path::PathBuf, String> {
-    let executable_path = std::env::current_exe().map_err(|error| error.to_string())?;
-    let executable_directory = executable_path
-        .parent()
-        .ok_or_else(|| "The executable directory could not be determined.".to_string())?;
-
-    Ok(executable_directory.join("settings.json"))
+fn settings_path(app: &tauri::AppHandle) -> Result<std::path::PathBuf, String> {
+    Ok(app
+        .path()
+        .app_config_dir()
+        .map_err(|error| error.to_string())?
+        .join("settings.json"))
 }
 
 #[cfg(windows)]
