@@ -21,9 +21,10 @@ pub fn run() {
 
             let settings_state = app.state::<app_settings::SettingsState>();
 
-            if let Err(error) =
-                tauri::async_runtime::block_on(app_settings::initialize_settings(&settings_state))
-            {
+            if let Err(error) = tauri::async_runtime::block_on(app_settings::initialize_settings(
+                app.handle(),
+                &settings_state,
+            )) {
                 eprintln!("Failed to initialize settings: {error}");
             }
 
