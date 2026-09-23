@@ -47,12 +47,18 @@ describe('isPointInRect', () => {
       expected: false,
     },
   ])('$description', ({ point, expected }) => {
-    const result = isPointInRect(point, rect);
+    // given
+    const input = point;
 
+    // when
+    const result = isPointInRect(input, rect);
+
+    // then
     expect(result).toBe(expected);
   });
 
   it('accepts the only point in a zero-size rectangle', () => {
+    // given
     const zeroSizeRect = {
       left: 50,
       top: 75,
@@ -60,8 +66,10 @@ describe('isPointInRect', () => {
       bottom: 75,
     } as DOMRect;
 
+    // when
     const result = isPointInRect({ x: 50, y: 75 }, zeroSizeRect);
 
+    // then
     expect(result).toBe(true);
   });
 });
