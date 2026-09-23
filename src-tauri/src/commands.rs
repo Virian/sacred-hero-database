@@ -1,4 +1,5 @@
 use crate::app_settings;
+use crate::character_repository;
 use crate::characters;
 use crate::imports;
 use serde_json::Value;
@@ -26,6 +27,13 @@ pub async fn get_active_characters(
     state: tauri::State<'_, app_settings::SettingsState>,
 ) -> Result<Vec<characters::ActiveCharacter>, String> {
     characters::get_active_characters(&state).await
+}
+
+#[tauri::command]
+pub async fn get_all_characters(
+    pool: tauri::State<'_, sqlx::SqlitePool>,
+) -> Result<Vec<character_repository::CharacterWithLatestVersion>, String> {
+    characters::get_all_characters(&pool).await
 }
 
 #[tauri::command]
