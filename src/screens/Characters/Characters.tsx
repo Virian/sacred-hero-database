@@ -7,9 +7,9 @@ import { SettingsContext } from '../../context';
 import { CharacterClass, Commands } from '../../enums';
 import { useInvokeQuery } from '../../hooks';
 import type { GetActiveCharactersCommandResponse } from '../../types';
+import { stripCharacterFormatting } from '../../utils';
 
 import { CharacterCard, EmptyCharacterCard } from './CharacterCard';
-import { stripCharacterFormatting } from './stripCharacterFormatting';
 import styles from './Characters.module.scss';
 import { Routes } from '../../constants';
 

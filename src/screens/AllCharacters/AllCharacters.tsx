@@ -1,26 +1,23 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
+import isNil from 'lodash/isNil';
 
 import {
   CharacterOverview,
   CharacterPortrait,
   CharacterTable,
+  Spinner,
   type ColumnDefinition,
 } from '../../components';
 import { Routes } from '../../constants';
-import { CharacterClass } from '../../enums';
-import type { Character } from '../../types';
+import { CharacterClass, Commands } from '../../enums';
+import { useInvokeQuery } from '../../hooks';
+import type { GetAllCharactersCommandResponse } from '../../types';
+import { stripCharacterFormatting } from '../../utils';
 
 import { CharacterDetails } from './CharacterDetails/CharacterDetails';
+import type { CharacterRow, MappedCharacter } from './AllCharacters.types';
 import styles from './AllCharacters.module.scss';
-
-interface CharacterRow {
-  id: string;
-  name: string;
-  characterClass: CharacterClass;
-  level: number;
-  versionCount: number;
-}
 
 const portraitColumn: ColumnDefinition<CharacterRow, CharacterClass> = {
   id: 'portrait',
@@ -35,11 +32,22 @@ const portraitColumn: ColumnDefinition<CharacterRow, CharacterClass> = {
   ),
 };
 
+const levelColumn: ColumnDefinition<CharacterRow, number | undefined> = {
+  id: 'level',
+  field: 'level',
+  width: 50,
+  headerLabel: 'Level',
+  headerCellClass: styles.numberCell,
+  rowCellClass: styles.numberCell,
+  cellRenderer: (level) => level ?? '-',
+};
+
 const columnDefinitions: ColumnDefinition<CharacterRow>[] = [
   portraitColumn,
   {
     id: 'name',
     field: 'name',
+    width: 'minmax(0, 1fr)',
     headerLabel: 'Name',
     rowCellClass: styles.nameCell,
   },
@@ -49,14 +57,7 @@ const columnDefinitions: ColumnDefinition<CharacterRow>[] = [
     width: 110,
     headerLabel: 'Class',
   },
-  {
-    id: 'level',
-    field: 'level',
-    width: 50,
-    headerLabel: 'Level',
-    headerCellClass: styles.numberCell,
-    rowCellClass: styles.numberCell,
-  },
+  levelColumn,
   {
     id: 'versionCount',
     field: 'versionCount',
@@ -67,127 +68,37 @@ const columnDefinitions: ColumnDefinition<CharacterRow>[] = [
   },
 ];
 
-interface CharacterWithVersionCount extends Character {
-  versionCount: number;
-}
-
-const MOCK_CHARACTERS: CharacterWithVersionCount[] = [
-  {
-    id: '1',
-    name: 'Ares',
-    characterClass: CharacterClass.GLADIATOR,
-    level: 42,
-    isHardcore: true,
-    deathCount: 0,
-    survivalBonus: 38,
-    playTime: 45240, // in seconds
-    modifiedAt: new Date(),
-    version: 1,
-    versionCount: 3,
-  },
-  {
-    id: '2',
-    name: 'Seraphina',
-    characterClass: CharacterClass.SERAPHIM,
-    level: 37,
-    isHardcore: false,
-    deathCount: 2,
-    survivalBonus: 95,
-    playTime: 33120, // in seconds
-    modifiedAt: new Date(),
-    version: 1,
-    versionCount: 1,
-  },
-  {
-    id: '3',
-    name: 'Shadow',
-    characterClass: CharacterClass.DARK_ELF,
-    level: 28,
-    isHardcore: false,
-    deathCount: 0,
-    survivalBonus: 76,
-    playTime: 24300, // in seconds
-    modifiedAt: new Date(),
-    version: 1,
-    versionCount: 2,
-  },
-  {
-    id: '4',
-    name: 'Sylvan',
-    characterClass: CharacterClass.WOOD_ELF,
-    level: 31,
-    isHardcore: true,
-    deathCount: 0,
-    survivalBonus: 84,
-    playTime: 28320, // in seconds
-    modifiedAt: new Date(),
-    version: 1,
-    versionCount: 2,
-  },
-  {
-    id: '5',
-    name: 'Merlin',
-    characterClass: CharacterClass.BATTLE_MAGE,
-    level: 40,
-    isHardcore: false,
-    deathCount: 12,
-    survivalBonus: 5,
-    playTime: 40860, // in seconds
-    modifiedAt: new Date(),
-    version: 1,
-    versionCount: 5,
-  },
-  {
-    id: '6',
-    name: 'Vladis',
-    characterClass: CharacterClass.VAMPIRESS,
-    level: 26,
-    isHardcore: false,
-    deathCount: 0,
-    survivalBonus: 64,
-    playTime: 19980, // in seconds
-    modifiedAt: new Date(),
-    version: 1,
-    versionCount: 1,
-  },
-  {
-    id: '7',
-    name: 'Brom',
-    characterClass: CharacterClass.DWARF,
-    level: 18,
-    isHardcore: true,
-    deathCount: 1,
-    survivalBonus: 22,
-    playTime: 1980, // in seconds
-    modifiedAt: new Date(),
-    version: 1,
-    versionCount: 2,
-  },
-  {
-    id: '8',
-    name: 'Zhar',
-    characterClass: CharacterClass.DAEMON,
-    level: 33,
-    isHardcore: false,
-    deathCount: 10,
-    survivalBonus: 68,
-    playTime: 32180, // in seconds
-    modifiedAt: new Date(),
-    version: 1,
-    versionCount: 2,
-  },
-];
-
 export const AllCharacters = () => {
   const navigate = useNavigate();
 
   const [selectedCharacter, setSelectedCharacter] =
-    useState<CharacterWithVersionCount | null>(null);
+    useState<MappedCharacter | null>(null);
+
+  const { data: characters, isLoading } = useInvokeQuery<
+    GetAllCharactersCommandResponse,
+    MappedCharacter[]
+  >({
+    command: Commands.GET_ALL_CHARACTERS,
+    mapper: (data) =>
+      data.map((character) => ({
+        id: character.id,
+        characterClass: character.class,
+        name: stripCharacterFormatting(character.name),
+        versionCount: character.versions_count,
+        version: character.latest_version?.version_number,
+        level: character.latest_version?.level,
+        isHardcore: character.latest_version?.hardcore,
+        deathCount: character.latest_version?.deaths,
+        survivalBonus: character.latest_version?.survival_bonus,
+        playTime: character.latest_version?.play_time_seconds,
+        modifiedAt: isNil(character.latest_version?.modified_at)
+          ? undefined
+          : new Date(character.latest_version.modified_at),
+      })),
+  });
 
   const handleRowClick = (characterId: string) => {
-    const clickedCharacter = MOCK_CHARACTERS.find(
-      ({ id }) => id === characterId,
-    );
+    const clickedCharacter = characters?.find(({ id }) => id === characterId);
     setSelectedCharacter(clickedCharacter || null);
   };
 
@@ -206,45 +117,53 @@ export const AllCharacters = () => {
       <h2 className={styles.subheading}>
         Your characters (latest version of each)
       </h2>
-      <div className={styles.content}>
-        <div className={styles.tableSection}>
-          <CharacterTable
-            columnDefinitions={columnDefinitions}
-            rows={MOCK_CHARACTERS}
-            isFullWidth
-            selectedRowIds={selectedCharacter ? [selectedCharacter.id] : []}
-            onRowClick={handleRowClick}
-          />
-          <span className={styles.characterCount}>12 characters</span>
+      {isLoading ? (
+        <div className={styles.spinnerContainer}>
+          <Spinner />
         </div>
+      ) : (
+        <div className={styles.content}>
+          <div className={styles.tableSection}>
+            <CharacterTable
+              columnDefinitions={columnDefinitions}
+              rows={characters || []}
+              isFullWidth
+              selectedRowIds={selectedCharacter ? [selectedCharacter.id] : []}
+              onRowClick={handleRowClick}
+            />
+            <span className={styles.characterCount}>
+              {characters?.length || 0} characters
+            </span>
+          </div>
 
-        {selectedCharacter ? (
-          <>
-            <div className={styles.separator} />
+          {selectedCharacter ? (
+            <>
+              <div className={styles.separator} />
 
-            <div className={styles.characterSection}>
-              <CharacterOverview
-                id={selectedCharacter.id}
-                characterClass={selectedCharacter.characterClass}
-                name={selectedCharacter.name}
-                level={selectedCharacter.level}
-                levelLabel="Latest Lv"
-                overviewText={`${selectedCharacter.versionCount} versions`}
-                onActivate={() => null}
-                onViewVersions={handleViewVersions}
-                onDelete={() => null}
-              />
-              <CharacterDetails
-                isHardcore={selectedCharacter.isHardcore}
-                deathCount={selectedCharacter.deathCount}
-                survivalBonus={selectedCharacter.survivalBonus}
-                playTime={selectedCharacter.playTime}
-                modifiedAt={selectedCharacter.modifiedAt}
-              />
-            </div>
-          </>
-        ) : null}
-      </div>
+              <div className={styles.characterSection}>
+                <CharacterOverview
+                  id={selectedCharacter.id}
+                  characterClass={selectedCharacter.characterClass}
+                  name={selectedCharacter.name}
+                  level={selectedCharacter.level}
+                  levelLabel="Latest Lv"
+                  overviewText={`${selectedCharacter.versionCount} version(s)`}
+                  onActivate={() => null}
+                  onViewVersions={handleViewVersions}
+                  onDelete={() => null}
+                />
+                <CharacterDetails
+                  isHardcore={selectedCharacter.isHardcore}
+                  deathCount={selectedCharacter.deathCount}
+                  survivalBonus={selectedCharacter.survivalBonus}
+                  playTime={selectedCharacter.playTime}
+                  modifiedAt={selectedCharacter.modifiedAt}
+                />
+              </div>
+            </>
+          ) : null}
+        </div>
+      )}
     </div>
   );
 };

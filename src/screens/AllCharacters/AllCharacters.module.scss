@@ -17,6 +17,12 @@
   font-weight: 500;
 }
 
+.spinnerContainer {
+  display: flex;
+  justify-content: center;
+  padding-top: 200px;
+}
+
 .content {
   flex: 1;
   display: flex;
@@ -40,6 +46,9 @@
 }
 
 .nameCell {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
   color: var(--text-primary);
   font-weight: 600;
 }
