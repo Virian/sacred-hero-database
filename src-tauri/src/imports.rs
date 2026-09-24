@@ -85,7 +85,7 @@ async fn import_one(
         .await
         .map_err(|error| format!("Could not start database transaction: {error}"))?;
 
-    let character_id = character_repository::find_character_id_by_class(
+    let character_id = character_repository::find_character_id_by_name_and_class(
         &mut transaction,
         &normalized_name,
         &character.class,

@@ -61,6 +61,15 @@ pub async fn get_all_characters_count(pool: &sqlx::SqlitePool) -> Result<u32, St
         })
 }
 
+pub async fn get_character_by_id(
+    pool: &sqlx::SqlitePool,
+    character_id: String,
+) -> Result<Option<character_repository::Character>, String> {
+    character_repository::get_character_by_id(pool, &character_id)
+        .await
+        .map_err(|error| format!("Could not get character by id: {error}"))
+}
+
 pub async fn get_character_versions(
     pool: &sqlx::SqlitePool,
     character_id: String,

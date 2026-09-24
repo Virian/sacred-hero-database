@@ -42,6 +42,13 @@ struct CharacterWithLatestVersionRow {
     latest_version_created_at: Option<String>,
 }
 
+#[derive(Debug, Serialize, sqlx::FromRow)]
+pub struct Character {
+    pub id: String,
+    pub name: String,
+    pub class: String,
+}
+
 pub async fn get_all_characters(
     pool: &sqlx::SqlitePool,
 ) -> Result<Vec<CharacterWithLatestVersion>, sqlx::Error> {
@@ -114,6 +121,16 @@ pub async fn get_all_characters(
         .collect())
 }
 
+pub async fn get_character_by_id(
+    pool: &sqlx::SqlitePool,
+    character_id: &str,
+) -> Result<Option<Character>, sqlx::Error> {
+    sqlx::query_as::<_, Character>("SELECT id, name, class FROM characters WHERE id = ?")
+        .bind(character_id)
+        .fetch_optional(pool)
+        .await
+}
+
 pub async fn insert_character(
     transaction: &mut Transaction<'_, Sqlite>,
     name: &str,
@@ -131,7 +148,7 @@ pub async fn insert_character(
     Ok(id)
 }
 
-pub async fn find_character_id_by_class(
+pub async fn find_character_id_by_name_and_class(
     transaction: &mut Transaction<'_, Sqlite>,
     name: &str,
     class: &str,
@@ -213,7 +230,7 @@ pub async fn get_character_versions(
     pool: &sqlx::SqlitePool,
     character_id: &str,
 ) -> Result<Vec<CharacterVersionDetails>, sqlx::Error> {
-    let rows: Vec<CharacterVersionDetails> = sqlx::query_as(
+    sqlx::query_as::<_, CharacterVersionDetails>(
         "SELECT
         id,
         version_number,
@@ -226,13 +243,11 @@ pub async fn get_character_versions(
         created_at
     FROM character_versions
     WHERE character_id = ?
-    ORDER BY modified_at DESC",
+    ORDER BY modified_at DESC, id DESC",
     )
     .bind(character_id)
     .fetch_all(pool)
-    .await?;
-
-    Ok(rows)
+    .await
 }
 
 fn strip_character_formatting(value: &str) -> String {
