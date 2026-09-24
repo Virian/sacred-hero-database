@@ -128,10 +128,10 @@ export const CharacterVersions = () => {
     <div className={styles.container}>
       <div className={styles.navigation}>
         <Link
-          to={`/${Routes.ALL_CHARACTERS}`}
+          to={`/${Routes.CHARACTERS_DATBASE}`}
           className={styles.link}
         >
-          All Characters
+          Characters Database
         </Link>
         <ChevronRight size={18} />
         <span className={styles.navigationName}>

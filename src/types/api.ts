@@ -57,6 +57,8 @@ export type GetAllCharactersCommandResponse = {
   latest_version: ApiCharacterVersion | null;
 }[];
 
+export type GetAllCharactersCountCommandResponse = number;
+
 export interface ImportCharactersCommandParams {
   filePaths: string[];
 }

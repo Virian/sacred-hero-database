@@ -1,6 +1,6 @@
 export const Routes = {
   CHARACTERS: 'characters',
-  ALL_CHARACTERS: 'all-characters',
+  CHARACTERS_DATBASE: 'characters-database',
   CHARACTER_VERSIONS: 'versions/:characterId',
   IMPORT: 'import',
   SETTINGS: 'settings',
