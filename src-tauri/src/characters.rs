@@ -9,21 +9,11 @@ pub struct ActiveCharacter {
     pub character: Option<save_reader::CharacterInfo>,
 }
 
-pub async fn get_all_characters(
-    pool: &sqlx::SqlitePool,
-) -> Result<Vec<character_repository::CharacterWithLatestVersion>, String> {
-    character_repository::get_all_characters(pool)
-        .await
-        .map_err(|error| format!("Could not get characters: {error}"))
-}
-
-pub async fn get_all_characters_count(pool: &sqlx::SqlitePool) -> Result<u32, String> {
-    character_repository::get_all_characters(pool)
-        .await
-        .map_err(|error| format!("Could not get characters: {error}"))
-        .and_then(|characters| {
-            u32::try_from(characters.len()).map_err(|_| "Too many characters.".to_string())
-        })
+#[derive(Serialize)]
+pub struct CharacterVersionWithLatest {
+    #[serde(flatten)]
+    pub version: character_repository::CharacterVersionDetails,
+    pub is_latest: bool,
 }
 
 pub async fn get_active_characters(
@@ -52,4 +42,39 @@ pub async fn get_active_characters(
         .collect();
 
     Ok(characters)
+}
+
+pub async fn get_all_characters(
+    pool: &sqlx::SqlitePool,
+) -> Result<Vec<character_repository::CharacterWithLatestVersion>, String> {
+    character_repository::get_all_characters(pool)
+        .await
+        .map_err(|error| format!("Could not get characters: {error}"))
+}
+
+pub async fn get_all_characters_count(pool: &sqlx::SqlitePool) -> Result<u32, String> {
+    character_repository::get_all_characters(pool)
+        .await
+        .map_err(|error| format!("Could not get characters: {error}"))
+        .and_then(|characters| {
+            u32::try_from(characters.len()).map_err(|_| "Too many characters.".to_string())
+        })
+}
+
+pub async fn get_character_versions(
+    pool: &sqlx::SqlitePool,
+    character_id: String,
+) -> Result<Vec<CharacterVersionWithLatest>, String> {
+    let rows = character_repository::get_character_versions(pool, &character_id)
+        .await
+        .map_err(|error| format!("Could not get character versions: {error}"))?;
+
+    Ok(rows
+        .into_iter()
+        .enumerate()
+        .map(|(index, row)| CharacterVersionWithLatest {
+            version: row,
+            is_latest: index == 0,
+        })
+        .collect())
 }

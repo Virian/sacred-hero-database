@@ -44,6 +44,14 @@ pub async fn get_all_characters_count(
 }
 
 #[tauri::command]
+pub async fn get_character_versions(
+    pool: tauri::State<'_, sqlx::SqlitePool>,
+    character_id: String,
+) -> Result<Vec<characters::CharacterVersionWithLatest>, String> {
+    characters::get_character_versions(&pool, character_id).await
+}
+
+#[tauri::command]
 pub async fn import_characters(
     app: tauri::AppHandle,
     pool: tauri::State<'_, sqlx::SqlitePool>,

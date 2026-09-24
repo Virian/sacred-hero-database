@@ -209,6 +209,32 @@ pub async fn insert_version(
     Ok(())
 }
 
+pub async fn get_character_versions(
+    pool: &sqlx::SqlitePool,
+    character_id: &str,
+) -> Result<Vec<CharacterVersionDetails>, sqlx::Error> {
+    let rows: Vec<CharacterVersionDetails> = sqlx::query_as(
+        "SELECT
+        id,
+        version_number,
+        level,
+        hardcore,
+        deaths,
+        survival_bonus,
+        play_time_seconds,
+        modified_at,
+        created_at
+    FROM character_versions
+    WHERE character_id = ?
+    ORDER BY modified_at DESC",
+    )
+    .bind(character_id)
+    .fetch_all(pool)
+    .await?;
+
+    Ok(rows)
+}
+
 fn strip_character_formatting(value: &str) -> String {
     let characters: Vec<char> = value.chars().collect();
     let mut result = String::with_capacity(value.len());
