@@ -12,6 +12,9 @@ import { Tooltip } from 'react-tooltip';
 import { Badge, Menu, MenuOption, SettingsError, Spinner } from '../';
 import { Routes } from '../../constants';
 import { SettingsContext } from '../../context';
+import { Commands } from '../../enums';
+import { useInvokeQuery } from '../../hooks';
+import type { GetAllCharactersCountCommandResponse } from '../../types';
 
 import styles from './AppLayout.module.scss';
 
@@ -20,6 +23,22 @@ export const AppLayout = () => {
     useContext(SettingsContext);
 
   const isGameInstallationPathMissing = !settings.gameInstallationPath;
+
+  const { data: charactersCount } =
+    useInvokeQuery<GetAllCharactersCountCommandResponse>({
+      command: Commands.GET_ALL_CHARACTERS_COUNT,
+    });
+
+  const renderCountBadge = () => {
+    if (!charactersCount) {
+      return null;
+    }
+
+    const charactersCountFormatted =
+      charactersCount > 999 ? '999+' : charactersCount;
+
+    return <Badge>{charactersCountFormatted}</Badge>;
+  };
 
   if (!isInitialized) {
     return (
@@ -45,9 +64,9 @@ export const AppLayout = () => {
           />
           <MenuOption
             icon={BookUser}
-            route={`/${Routes.ALL_CHARACTERS}`}
-            label="All Characters"
-            rightContent={<Badge>12</Badge>}
+            route={`/${Routes.CHARACTERS_DATBASE}`}
+            label="Database"
+            rightContent={renderCountBadge()}
           />
           <MenuOption
             icon={Download}

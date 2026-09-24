@@ -17,6 +17,15 @@ pub async fn get_all_characters(
         .map_err(|error| format!("Could not get characters: {error}"))
 }
 
+pub async fn get_all_characters_count(pool: &sqlx::SqlitePool) -> Result<u32, String> {
+    character_repository::get_all_characters(pool)
+        .await
+        .map_err(|error| format!("Could not get characters: {error}"))
+        .and_then(|characters| {
+            u32::try_from(characters.len()).map_err(|_| "Too many characters.".to_string())
+        })
+}
+
 pub async fn get_active_characters(
     state: &app_settings::SettingsState,
 ) -> Result<Vec<ActiveCharacter>, String> {

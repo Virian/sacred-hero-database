@@ -3,6 +3,7 @@ export const Commands = {
   UPDATE_SETTINGS: 'update_settings',
   GET_ACTIVE_CHARACTERS: 'get_active_characters',
   GET_ALL_CHARACTERS: 'get_all_characters',
+  GET_ALL_CHARACTERS_COUNT: 'get_all_characters_count',
   IMPORT_CHARACTERS: 'import_characters',
 } as const;
 

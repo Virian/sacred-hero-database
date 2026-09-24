@@ -37,6 +37,13 @@ pub async fn get_all_characters(
 }
 
 #[tauri::command]
+pub async fn get_all_characters_count(
+    pool: tauri::State<'_, sqlx::SqlitePool>,
+) -> Result<u32, String> {
+    characters::get_all_characters_count(&pool).await
+}
+
+#[tauri::command]
 pub async fn import_characters(
     app: tauri::AppHandle,
     pool: tauri::State<'_, sqlx::SqlitePool>,

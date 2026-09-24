@@ -36,6 +36,7 @@ pub fn run() {
             commands::update_settings,
             commands::get_active_characters,
             commands::get_all_characters,
+            commands::get_all_characters_count,
             commands::import_characters
         ])
         .run(tauri::generate_context!())

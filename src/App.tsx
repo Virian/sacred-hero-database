@@ -5,8 +5,8 @@ import { AppLayout, ErrorBoundary } from './components';
 import { Routes as RouteDefinitions } from './constants';
 import { SettingsProvider } from './context';
 import {
-  AllCharacters,
   Characters,
+  CharactersDatabase,
   CharacterVersions,
   Import,
   Settings,
@@ -23,10 +23,10 @@ function App() {
                 path={RouteDefinitions.CHARACTERS}
                 element={<Characters />}
               />
-              <Route path={RouteDefinitions.ALL_CHARACTERS}>
+              <Route path={RouteDefinitions.CHARACTERS_DATBASE}>
                 <Route
                   index
-                  element={<AllCharacters />}
+                  element={<CharactersDatabase />}
                 />
                 <Route
                   path={RouteDefinitions.CHARACTER_VERSIONS}

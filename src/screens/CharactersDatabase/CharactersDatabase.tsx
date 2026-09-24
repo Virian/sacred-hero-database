@@ -16,8 +16,8 @@ import type { GetAllCharactersCommandResponse } from '../../types';
 import { stripCharacterFormatting } from '../../utils';
 
 import { CharacterDetails } from './CharacterDetails/CharacterDetails';
-import type { CharacterRow, MappedCharacter } from './AllCharacters.types';
-import styles from './AllCharacters.module.scss';
+import type { CharacterRow, MappedCharacter } from './CharactersDatabase.types';
+import styles from './CharactersDatabase.module.scss';
 
 const portraitColumn: ColumnDefinition<CharacterRow, CharacterClass> = {
   id: 'portrait',
@@ -68,7 +68,7 @@ const columnDefinitions: ColumnDefinition<CharacterRow>[] = [
   },
 ];
 
-export const AllCharacters = () => {
+export const CharactersDatabase = () => {
   const navigate = useNavigate();
 
   const [selectedCharacter, setSelectedCharacter] =
@@ -104,7 +104,7 @@ export const AllCharacters = () => {
 
   const handleViewVersions = (id: string) => {
     navigate(
-      `/${Routes.ALL_CHARACTERS}/${Routes.CHARACTER_VERSIONS}`.replace(
+      `/${Routes.CHARACTERS_DATBASE}/${Routes.CHARACTER_VERSIONS}`.replace(
         ':characterId',
         id,
       ),
@@ -113,7 +113,7 @@ export const AllCharacters = () => {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.heading}>All Characters</h1>
+      <h1 className={styles.heading}>Characters Database</h1>
       <h2 className={styles.subheading}>
         Your characters (latest version of each)
       </h2>
