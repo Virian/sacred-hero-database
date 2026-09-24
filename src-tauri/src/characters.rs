@@ -1,4 +1,4 @@
-use crate::{app_settings, save_reader};
+use crate::{app_settings, character_repository, save_reader};
 use serde::Serialize;
 use serde_json::Value;
 use std::path::PathBuf;
@@ -7,6 +7,14 @@ use std::path::PathBuf;
 pub struct ActiveCharacter {
     pub slot: u32,
     pub character: Option<save_reader::CharacterInfo>,
+}
+
+pub async fn get_all_characters(
+    pool: &sqlx::SqlitePool,
+) -> Result<Vec<character_repository::CharacterWithLatestVersion>, String> {
+    character_repository::get_all_characters(pool)
+        .await
+        .map_err(|error| format!("Could not get characters: {error}"))
 }
 
 pub async fn get_active_characters(

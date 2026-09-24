@@ -1,6 +1,118 @@
 use crate::save_reader;
+use serde::Serialize;
 use sqlx::{Sqlite, Transaction};
 use uuid::Uuid;
+
+#[derive(Debug, Serialize, sqlx::FromRow)]
+pub struct CharacterVersionDetails {
+    pub id: String,
+    pub version_number: i64,
+    pub level: i64,
+    pub hardcore: bool,
+    pub deaths: i64,
+    pub survival_bonus: i64,
+    pub play_time_seconds: i64,
+    pub modified_at: String,
+    pub created_at: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct CharacterWithLatestVersion {
+    pub id: String,
+    pub name: String,
+    pub class: String,
+    pub versions_count: i64,
+    pub latest_version: Option<CharacterVersionDetails>,
+}
+
+#[derive(Debug, sqlx::FromRow)]
+struct CharacterWithLatestVersionRow {
+    id: String,
+    name: String,
+    class: String,
+    versions_count: i64,
+    latest_version_id: Option<String>,
+    latest_version_number: Option<i64>,
+    latest_version_level: Option<i64>,
+    latest_version_hardcore: Option<bool>,
+    latest_version_deaths: Option<i64>,
+    latest_version_survival_bonus: Option<i64>,
+    latest_version_play_time_seconds: Option<i64>,
+    latest_version_modified_at: Option<String>,
+    latest_version_created_at: Option<String>,
+}
+
+pub async fn get_all_characters(
+    pool: &sqlx::SqlitePool,
+) -> Result<Vec<CharacterWithLatestVersion>, sqlx::Error> {
+    let rows: Vec<CharacterWithLatestVersionRow> = sqlx::query_as(
+        "SELECT
+            characters.id,
+            characters.name,
+            characters.class,
+            COUNT(character_versions.id) AS versions_count,
+            latest.id AS latest_version_id,
+            latest.version_number AS latest_version_number,
+            latest.level AS latest_version_level,
+            latest.hardcore AS latest_version_hardcore,
+            latest.deaths AS latest_version_deaths,
+            latest.survival_bonus AS latest_version_survival_bonus,
+            latest.play_time_seconds AS latest_version_play_time_seconds,
+            latest.modified_at AS latest_version_modified_at,
+            latest.created_at AS latest_version_created_at
+        FROM characters
+        LEFT JOIN character_versions
+            ON character_versions.character_id = characters.id
+        LEFT JOIN (
+            SELECT
+                character_versions.*,
+                ROW_NUMBER() OVER (
+                    PARTITION BY character_id
+                    ORDER BY modified_at DESC, id DESC
+                ) AS row_number
+            FROM character_versions
+        ) AS latest
+            ON latest.character_id = characters.id AND latest.row_number = 1
+        GROUP BY characters.id, characters.name, characters.class,
+            latest.id, latest.version_number, latest.level, latest.hardcore,
+            latest.deaths, latest.survival_bonus, latest.play_time_seconds,
+            latest.modified_at, latest.created_at
+        ORDER BY latest.created_at DESC, characters.name COLLATE NOCASE, characters.id",
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(rows
+        .into_iter()
+        .map(|row| CharacterWithLatestVersion {
+            id: row.id,
+            name: row.name,
+            class: row.class,
+            versions_count: row.versions_count,
+            latest_version: row.latest_version_id.map(|id| CharacterVersionDetails {
+                id,
+                version_number: row.latest_version_number.expect("latest version number"),
+                level: row.latest_version_level.expect("latest version level"),
+                hardcore: row
+                    .latest_version_hardcore
+                    .expect("latest version hardcore"),
+                deaths: row.latest_version_deaths.expect("latest version deaths"),
+                survival_bonus: row
+                    .latest_version_survival_bonus
+                    .expect("latest version survival bonus"),
+                play_time_seconds: row
+                    .latest_version_play_time_seconds
+                    .expect("latest version play time"),
+                modified_at: row
+                    .latest_version_modified_at
+                    .expect("latest version modified date"),
+                created_at: row
+                    .latest_version_created_at
+                    .expect("latest version created date"),
+            }),
+        })
+        .collect())
+}
 
 pub async fn insert_character(
     transaction: &mut Transaction<'_, Sqlite>,

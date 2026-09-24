@@ -37,6 +37,26 @@ interface ApiActiveCharacterWithSlot {
 
 export type GetActiveCharactersCommandResponse = ApiActiveCharacterWithSlot[];
 
+interface ApiCharacterVersion {
+  id: string;
+  version_number: number;
+  level: number;
+  hardcore: boolean;
+  deaths: number;
+  survival_bonus: number;
+  play_time_seconds: number;
+  modified_at: string;
+  created_at: string;
+}
+
+export type GetAllCharactersCommandResponse = {
+  id: string;
+  name: string;
+  class: CharacterClass;
+  versions_count: number;
+  latest_version: ApiCharacterVersion | null;
+}[];
+
 export interface ImportCharactersCommandParams {
   filePaths: string[];
 }
