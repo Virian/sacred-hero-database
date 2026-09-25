@@ -33,7 +33,7 @@ export const Characters = () => {
   const {
     data,
     isLoading,
-    isPending,
+    isFetching,
     refetch: refetchActiveCharacters,
   } = useInvokeQuery<
     GetActiveCharactersCommandResponse,
@@ -121,7 +121,7 @@ export const Characters = () => {
         <div className={styles.actions}>
           <Button
             variant="secondary"
-            isLoading={isPending}
+            isLoading={isFetching}
             onClick={() => refetchActiveCharacters()}
           >
             <span className={styles.buttonText}>

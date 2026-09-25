@@ -59,12 +59,14 @@ describe('useInvokeQuery', () => {
     expect(result.current.hasFetched).toBe(false);
   });
 
-  it('manual refetch passes args and updates the mapped response', async () => {
+  it('manual refetch reuses args and updates the mapped response', async () => {
     // given
     tauriInvokeMock.mockResolvedValueOnce({ value: 10 });
+    const args = { mode: 'dark' };
     const { result } = renderHook(() =>
       useInvokeQuery<{ value: number }, { value: number }, { mode: string }>({
         command: Commands.GET_SETTINGS,
+        args,
         mapper: (data) => ({ value: data.value + 1 }),
       }),
     );
@@ -76,7 +78,7 @@ describe('useInvokeQuery', () => {
     // when
     tauriInvokeMock.mockResolvedValueOnce({ value: 20 });
     await act(async () => {
-      await result.current.refetch({ mode: 'dark' });
+      await result.current.refetch();
     });
 
     // then
@@ -86,7 +88,7 @@ describe('useInvokeQuery', () => {
     expect(result.current.data).toEqual({ value: 21 });
   });
 
-  it('tracks isPending and isLoading during the initial and subsequent fetch lifecycles', async () => {
+  it('tracks isFetching and isLoading during the initial and subsequent fetch lifecycles', async () => {
     // given
     let firstResolve: (value: { value: number }) => void;
     let secondResolve: (value: { value: number }) => void;
@@ -117,7 +119,7 @@ describe('useInvokeQuery', () => {
     });
 
     // then initial request
-    expect(result.current.isPending).toBe(true);
+    expect(result.current.isFetching).toBe(true);
     expect(result.current.isLoading).toBe(true);
     expect(result.current.hasFetched).toBe(false);
 
@@ -128,7 +130,7 @@ describe('useInvokeQuery', () => {
     await waitFor(() => {
       expect(result.current.hasFetched).toBe(true);
       expect(result.current.data).toEqual({ value: 42 });
-      expect(result.current.isPending).toBe(false);
+      expect(result.current.isFetching).toBe(false);
       expect(result.current.isLoading).toBe(false);
     });
 
@@ -142,7 +144,7 @@ describe('useInvokeQuery', () => {
     });
 
     // then
-    expect(result.current.isPending).toBe(true);
+    expect(result.current.isFetching).toBe(true);
     expect(result.current.isLoading).toBe(false);
     expect(result.current.hasFetched).toBe(true);
 
@@ -152,7 +154,7 @@ describe('useInvokeQuery', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.isPending).toBe(false);
+      expect(result.current.isFetching).toBe(false);
       expect(result.current.isLoading).toBe(false);
       expect(result.current.hasFetched).toBe(true);
       expect(result.current.data).toEqual({ value: 99 });
@@ -176,7 +178,7 @@ describe('useInvokeQuery', () => {
 
     // then
     expect(result.current.hasFetched).toBe(true);
-    expect(result.current.isPending).toBe(false);
+    expect(result.current.isFetching).toBe(false);
     expect(result.current.isLoading).toBe(false);
   });
 });

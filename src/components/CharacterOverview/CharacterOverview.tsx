@@ -8,8 +8,8 @@ import styles from './CharacterOverview.module.scss';
 
 interface CharacterOverviewProps {
   id: string;
-  characterClass: CharacterClass;
-  name: string;
+  characterClass?: CharacterClass;
+  name?: string;
   level?: number;
   className?: string;
   levelLabel?: string;
@@ -35,18 +35,21 @@ export const CharacterOverview = ({
   const handleViewVersions = () => onViewVersions?.(id);
   const handleDelete = () => onDelete?.(id);
 
+  const levelText = isNil(level) ? '' : `${levelLabel}${level}`;
+
   return (
     <div className={clsx(styles.characterOverview, className)}>
       <div className={styles.allOverviewInformation}>
-        <CharacterPortrait
-          characterClass={characterClass}
-          size={56}
-        />
+        {characterClass && (
+          <CharacterPortrait
+            characterClass={characterClass}
+            size={56}
+          />
+        )}
         <div className={styles.overviewTextInformationContainer}>
           <h4>{name}</h4>
           <p className={styles.overviewText}>
-            {characterClass}
-            {isNil(level) ? '' : ` · ${levelLabel}${level}`}
+            {[characterClass, levelText].filter(Boolean).join(' · ')}
           </p>
           {overviewText && (
             <p className={styles.overviewText}>{overviewText}</p>

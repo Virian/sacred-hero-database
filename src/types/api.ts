@@ -59,6 +59,33 @@ export type GetAllCharactersCommandResponse = {
 
 export type GetAllCharactersCountCommandResponse = number;
 
+export type GetCharacterByIdCommandParams = {
+  characterId: string;
+};
+
+export type GetCharacterByIdCommandResponse = {
+  id: string;
+  name: string;
+  class: CharacterClass;
+} | null;
+
+export type GetCharacterVersionsCommandParams = {
+  characterId: string;
+};
+
+export type GetCharacterVersionsCommandResponse = {
+  id: string;
+  version_number: number;
+  is_latest: boolean;
+  level: number;
+  hardcore: boolean;
+  deaths: number;
+  survival_bonus: number;
+  play_time_seconds: number;
+  modified_at: string;
+  created_at: string;
+}[];
+
 export interface ImportCharactersCommandParams {
   filePaths: string[];
 }
