@@ -135,10 +135,7 @@ describe('useImportFiles', () => {
         characterClass: 'Wood Elf',
       },
     ]);
-    expect(toast.info).toHaveBeenCalledWith('Import process finished.', {
-      position: 'bottom-center',
-      theme: 'dark',
-    });
+    expect(toast.info).toHaveBeenCalledWith('Import process finished.');
   });
 
   it('reports when a dropped selection has no compatible save files', async () => {
@@ -167,10 +164,6 @@ describe('useImportFiles', () => {
     // then
     expect(toast.error).toHaveBeenCalledWith(
       'No compatible save files found. Please select Sacred .pax files.',
-      {
-        position: 'bottom-center',
-        theme: 'dark',
-      },
     );
     expect(invokeMock).not.toHaveBeenCalled();
   });
