@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ImportCharactersCommandResponse } from '../../../types';
+import type { ImportCharactersCommandResponse } from '../../types';
 import { mapImportCommandResponse } from '../mapImportCommandResponse';
 
 describe('mapImportCommandResponse', () => {

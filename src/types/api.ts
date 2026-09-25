@@ -108,7 +108,13 @@ interface ImportResultError {
   error: string;
 }
 
-type ImportResult =
+export type ImportResult =
   ImportResultSuccess | ImportResultSkipped | ImportResultError;
 
 export type ImportCharactersCommandResponse = ImportResult[];
+
+export interface BackupCommandParams {
+  slotNumber: number;
+}
+
+export type BackupCommandResponse = ImportResult;
