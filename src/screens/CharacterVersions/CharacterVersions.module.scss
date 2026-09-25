@@ -42,8 +42,15 @@
   font-weight: 600;
 }
 
+.spinnerContainer {
+  display: flex;
+  justify-content: center;
+  padding-top: 200px;
+}
+
 .tableSection {
   display: flex;
+  align-items: flex-start;
   gap: 0.5rem;
   overflow: hidden;
 }
@@ -74,11 +81,14 @@
 }
 
 .overview {
-  align-self: flex-start;
   min-width: 250px;
 }
 
 .backButton {
   align-self: flex-start;
   margin-top: 0.5rem;
+}
+
+.backButtonLoadingScreen {
+  margin-top: auto;
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router';
 import clsx from 'clsx';
 import { ChevronRight } from 'lucide-react';
 
@@ -7,20 +7,35 @@ import {
   Button,
   CharacterOverview,
   CharacterTable,
+  Spinner,
   type ColumnDefinition,
 } from '../../components';
 import { Routes } from '../../constants';
-import { CharacterClass } from '../../enums';
+import { Commands } from '../../enums';
+import { useInvokeQuery } from '../../hooks';
+import type {
+  Character,
+  GetCharacterByIdCommandParams,
+  GetCharacterByIdCommandResponse,
+  GetCharacterVersionsCommandParams,
+  GetCharacterVersionsCommandResponse,
+} from '../../types';
+import { stripCharacterFormatting } from '../../utils';
 
 import styles from './CharacterVersions.module.scss';
+
+type CharacterData = Pick<Character, 'id' | 'name' | 'characterClass'>;
 
 interface CharacterRow {
   id: string;
   version: number;
   level: number;
+  isHardcore: boolean;
   deathCount: number;
   survivalBonus: number;
+  playTime: number;
   modifiedAt: Date;
+  createdAt: Date;
   isLatest: boolean;
 }
 
@@ -75,50 +90,78 @@ const columnDefinitions: ColumnDefinition<CharacterRow>[] = [
   modifiedDateColumn,
 ];
 
-const MOCK_CHARACTERS: CharacterRow[] = [
-  {
-    id: '3',
-    version: 3,
-    level: 42,
-    deathCount: 2,
-    survivalBonus: 15,
-    modifiedAt: new Date(),
-    isLatest: true,
-  },
-  {
-    id: '2',
-    version: 2,
-    level: 40,
-    deathCount: 1,
-    survivalBonus: 22,
-    modifiedAt: new Date(),
-    isLatest: false,
-  },
-  {
-    id: '1',
-    version: 1,
-    level: 35,
-    deathCount: 0,
-    survivalBonus: 38,
-    modifiedAt: new Date(),
-    isLatest: false,
-  },
-];
-
-const MOCK_CURRENT_CHARACTER = {
-  name: 'Ares',
-  characterClass: CharacterClass.GLADIATOR,
-};
-
 export const CharacterVersions = () => {
   const navigate = useNavigate();
+  const { characterId = '' } = useParams();
 
   const [selectedVersion, setSelectedVersion] = useState<CharacterRow | null>(
     null,
   );
 
+  const { data: characterVersions, isLoading: isLoadingCharacterVersions } =
+    useInvokeQuery<
+      GetCharacterVersionsCommandResponse,
+      CharacterRow[],
+      GetCharacterVersionsCommandParams
+    >({
+      command: Commands.GET_CHARACTER_VERSIONS,
+      args: { characterId },
+      mapper: (response) =>
+        response
+          // Double reversing because data comes from backend with the first
+          // element being the latest version. We want to have the lowest version
+          // number to be the oldest version.
+          .reverse()
+          .map(
+            (
+              {
+                id,
+                is_latest,
+                level,
+                hardcore,
+                deaths,
+                survival_bonus,
+                play_time_seconds,
+                modified_at,
+                created_at,
+              },
+              index,
+            ) => ({
+              id,
+              version: index + 1,
+              isLatest: is_latest,
+              level,
+              isHardcore: hardcore,
+              deathCount: deaths,
+              survivalBonus: survival_bonus,
+              playTime: play_time_seconds,
+              modifiedAt: new Date(modified_at),
+              createdAt: new Date(created_at),
+            }),
+          )
+          .reverse(),
+    });
+
+  const { data: characterData, isLoading: isLoadingCharacterData } =
+    useInvokeQuery<
+      GetCharacterByIdCommandResponse,
+      CharacterData | null,
+      GetCharacterByIdCommandParams
+    >({
+      command: Commands.GET_CHARACTER_BY_ID,
+      args: { characterId },
+      mapper: (response) =>
+        response && {
+          id: response.id,
+          characterClass: response.class,
+          name: stripCharacterFormatting(response.name),
+        },
+    });
+
+  const isLoading = isLoadingCharacterVersions || isLoadingCharacterData;
+
   const handleRowClick = (versionId: string) => {
-    const clickedCharacterVersion = MOCK_CHARACTERS.find(
+    const clickedCharacterVersion = characterVersions?.find(
       ({ id }) => id === versionId,
     );
     setSelectedVersion(clickedCharacterVersion || null);
@@ -134,40 +177,47 @@ export const CharacterVersions = () => {
           Characters Database
         </Link>
         <ChevronRight size={18} />
-        <span className={styles.navigationName}>
-          {MOCK_CURRENT_CHARACTER.name}
-        </span>
+        <span className={styles.navigationName}>{characterData?.name}</span>
       </div>
       <h1 className={styles.heading}>Character Versions</h1>
-      <div className={styles.tableSection}>
-        <CharacterTable
-          className={clsx({ [styles.fullTable]: !!selectedVersion })}
-          isFullWidth={!!selectedVersion}
-          rowClassName={styles.tableRow}
-          columnDefinitions={columnDefinitions}
-          rows={MOCK_CHARACTERS}
-          selectedRowIds={selectedVersion ? [selectedVersion.id] : []}
-          onRowClick={handleRowClick}
-        />
-        {selectedVersion && (
-          <CharacterOverview
-            className={styles.overview}
-            id={selectedVersion.id}
-            name={MOCK_CURRENT_CHARACTER.name}
-            characterClass={MOCK_CURRENT_CHARACTER.characterClass}
-            level={selectedVersion.level}
-            overviewText={
-              selectedVersion.isLatest
-                ? 'Latest version'
-                : `Version ${selectedVersion.version}`
-            }
-            onActivate={() => null}
-            onDelete={() => null}
+      {isLoading ? (
+        <div className={styles.spinnerContainer}>
+          <Spinner />
+        </div>
+      ) : (
+        <div className={styles.tableSection}>
+          <CharacterTable
+            className={clsx({ [styles.fullTable]: !!selectedVersion })}
+            isFullWidth={!!selectedVersion}
+            rowClassName={styles.tableRow}
+            columnDefinitions={columnDefinitions}
+            rows={characterVersions || []}
+            selectedRowIds={selectedVersion ? [selectedVersion.id] : []}
+            onRowClick={handleRowClick}
           />
-        )}
-      </div>
+          {selectedVersion && (
+            <CharacterOverview
+              className={styles.overview}
+              id={selectedVersion.id}
+              name={characterData?.name}
+              characterClass={characterData?.characterClass}
+              level={selectedVersion.level}
+              overviewText={
+                selectedVersion.isLatest
+                  ? 'Latest version'
+                  : `Version ${selectedVersion.version}`
+              }
+              onActivate={() => null}
+              onDelete={() => null}
+            />
+          )}
+        </div>
+      )}
+
       <Button
-        className={styles.backButton}
+        className={clsx(styles.backButton, {
+          [styles.backButtonLoadingScreen]: isLoading,
+        })}
         variant="secondary"
         onClick={() => navigate(-1)}
       >
