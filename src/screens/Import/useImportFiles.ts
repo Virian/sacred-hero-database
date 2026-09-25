@@ -5,23 +5,20 @@ import { open } from '@tauri-apps/plugin-dialog';
 
 import { Commands } from '../../enums';
 import { useInvokeMutation } from '../../hooks';
-
-import { isPointInRect } from './isPointInRect';
 import type {
   ImportCharactersCommandParams,
   ImportCharactersCommandResponse,
 } from '../../types';
-import {
-  type ImportResults,
-  mapImportCommandResponse,
-} from './mapImportCommandResponse';
+import { type ImportResult, mapImportCommandResponse } from '../../utils';
+
+import { isPointInRect } from './isPointInRect';
 
 export const useImportFiles = () => {
   const dropAreaRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
-  const [importResults, setImportResults] = useState<ImportResults>([]);
+  const [importResults, setImportResults] = useState<ImportResult[]>([]);
 
   // The Tauri listener is registered once, so the ref provides its current loading state
   // while the setter keeps that ref and the rendered React state synchronized.
@@ -32,10 +29,10 @@ export const useImportFiles = () => {
     setIsImporting(value);
   };
 
-  const { invoke } = useInvokeMutation<
+  const { invoke: importCharacters } = useInvokeMutation<
     ImportCharactersCommandParams,
     ImportCharactersCommandResponse,
-    ImportResults
+    ImportResult[]
   >({
     command: Commands.IMPORT_CHARACTERS,
     mapper: mapImportCommandResponse,
@@ -98,10 +95,6 @@ export const useImportFiles = () => {
           if (!savesPaths.length) {
             toast.error(
               'No compatible save files found. Please select Sacred .pax files.',
-              {
-                position: 'bottom-center',
-                theme: 'dark',
-              },
             );
             return;
           }
@@ -109,18 +102,12 @@ export const useImportFiles = () => {
           try {
             setImporting(true);
             setImportResults([]);
-            const data = await invoke({ filePaths: savesPaths });
+            const data = await importCharacters({ filePaths: savesPaths });
             setImportResults(data);
-            toast.info('Import process finished.', {
-              position: 'bottom-center',
-              theme: 'dark',
-            });
+            toast.info('Import process finished.');
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
           } catch (error) {
-            toast.error('Import process failed.', {
-              position: 'bottom-center',
-              theme: 'dark',
-            });
+            toast.error('Import process failed.');
           } finally {
             setImporting(false);
           }
@@ -162,18 +149,12 @@ export const useImportFiles = () => {
     try {
       setImporting(true);
       setImportResults([]);
-      const data = await invoke({ filePaths });
+      const data = await importCharacters({ filePaths });
       setImportResults(data);
-      toast.info('Import process finished.', {
-        position: 'bottom-center',
-        theme: 'dark',
-      });
+      toast.info('Import process finished.');
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      toast.error('Import process failed.', {
-        position: 'bottom-center',
-        theme: 'dark',
-      });
+      toast.error('Import process failed.');
     } finally {
       setImporting(false);
     }

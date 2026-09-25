@@ -52,7 +52,10 @@ function App() {
               />
             </Route>
           </Routes>
-          <ToastContainer />
+          <ToastContainer
+            theme="dark"
+            position="bottom-center"
+          />
         </SettingsProvider>
       </ErrorBoundary>
     </BrowserRouter>

@@ -60,6 +60,16 @@ pub async fn get_character_versions(
 }
 
 #[tauri::command]
+pub async fn backup(
+    app: tauri::AppHandle,
+    pool: tauri::State<'_, sqlx::SqlitePool>,
+    state: tauri::State<'_, app_settings::SettingsState>,
+    slot_number: u32,
+) -> Result<imports::ImportResult, String> {
+    characters::backup(&app, &pool, &state, slot_number).await
+}
+
+#[tauri::command]
 pub async fn import_characters(
     app: tauri::AppHandle,
     pool: tauri::State<'_, sqlx::SqlitePool>,

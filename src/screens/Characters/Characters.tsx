@@ -1,29 +1,15 @@
-import { useContext, useMemo } from 'react';
+import { useContext } from 'react';
 import { Link } from 'react-router';
 import { CircleX, RefreshCw } from 'lucide-react';
 
 import { Button, Spinner } from '../../components';
-import { SettingsContext } from '../../context';
-import { CharacterClass, Commands } from '../../enums';
-import { useInvokeQuery } from '../../hooks';
-import type { GetActiveCharactersCommandResponse } from '../../types';
-import { stripCharacterFormatting } from '../../utils';
-
-import { CharacterCard, EmptyCharacterCard } from './CharacterCard';
-import styles from './Characters.module.scss';
 import { Routes } from '../../constants';
+import { SettingsContext } from '../../context';
 
-interface ActiveCharacter {
-  id: string;
-  name: string;
-  characterClass: CharacterClass;
-  level: number;
-  isHardcore: boolean;
-  deathCount: number;
-  survivalBonus: number;
-  playTime: number;
-  modifiedAt: Date;
-}
+import styles from './Characters.module.scss';
+import { CharacterCard, EmptyCharacterCard } from './CharacterCard';
+import { useActiveCharacters } from './useActiveCharacters';
+import { useBackup } from './useBackup';
 
 export const Characters = () => {
   const {
@@ -31,43 +17,17 @@ export const Characters = () => {
   } = useContext(SettingsContext);
 
   const {
-    data,
-    isLoading,
-    isFetching,
+    activeCharacters,
     refetch: refetchActiveCharacters,
-  } = useInvokeQuery<
-    GetActiveCharactersCommandResponse,
-    Array<ActiveCharacter | null>
-  >({
-    command: Commands.GET_ACTIVE_CHARACTERS,
-    mapper: (data) =>
-      data.map(({ character, slot }) =>
-        character
-          ? {
-              id: `${slot}`,
-              name: stripCharacterFormatting(character.name),
-              characterClass: character.class,
-              level: character.level,
-              isHardcore: character.hardcore,
-              deathCount: character.revivals,
-              survivalBonus: character.survival_bonus,
-              playTime: character.play_time.secs,
-              modifiedAt: new Date(character.modified.secs_since_epoch * 1000),
-            }
-          : null,
-      ),
-  });
+    isLoading: isLoadingCharacters,
+    isFetching: isFetchingCharacters,
+  } = useActiveCharacters();
 
-  const activeCharacters: Array<ActiveCharacter | null> = useMemo(() => {
-    const baseArray = new Array(activeCharacterSlots).fill(null);
-
-    return baseArray.map((_, index) => {
-      const slotNumber = `${index + 1}`;
-      return (
-        (data || []).find((character) => character?.id === slotNumber) || null
-      );
-    });
-  }, [activeCharacterSlots, data]);
+  const {
+    backedUpCardNumber,
+    isLoading: isBackupLoading,
+    handleBackup,
+  } = useBackup();
 
   const renderContent = () => {
     if (!gameInstallationPath) {
@@ -92,7 +52,7 @@ export const Characters = () => {
       );
     }
 
-    if (isLoading) {
+    if (isLoadingCharacters) {
       return (
         <div className={styles.spinnerContainer}>
           <Spinner />
@@ -109,6 +69,10 @@ export const Characters = () => {
                 key={character.id}
                 cardNumber={index + 1}
                 character={character}
+                isBackupLoading={
+                  isBackupLoading && backedUpCardNumber === index + 1
+                }
+                onBackup={handleBackup}
               />
             ) : (
               <EmptyCharacterCard
@@ -121,7 +85,7 @@ export const Characters = () => {
         <div className={styles.actions}>
           <Button
             variant="secondary"
-            isLoading={isFetching}
+            isLoading={isFetchingCharacters}
             onClick={() => refetchActiveCharacters()}
           >
             <span className={styles.buttonText}>

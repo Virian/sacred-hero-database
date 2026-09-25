@@ -39,6 +39,7 @@ pub fn run() {
             commands::get_all_characters_count,
             commands::get_character_by_id,
             commands::get_character_versions,
+            commands::backup,
             commands::import_characters
         ])
         .run(tauri::generate_context!())

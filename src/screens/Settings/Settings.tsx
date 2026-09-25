@@ -17,7 +17,7 @@ import styles from './Settings.module.scss';
 
 export const Settings = () => {
   const { settings, fetchSettings } = useContext(SettingsContext);
-  const { invoke, isLoading: isUpdatingSettings } =
+  const { invoke: updateSettings, isLoading: isUpdatingSettings } =
     useInvokeMutation<UpdateSettingsCommandParams>({
       command: Commands.UPDATE_SETTINGS,
     });
@@ -32,21 +32,15 @@ export const Settings = () => {
 
   const saveSettings = async (values: FormValues) => {
     try {
-      await invoke({
+      await updateSettings({
         gameInstallationPath: values.installationPath,
         activeCharacterSlots: parseInt(values.activeCharacterSlots),
       });
       await fetchSettings();
-      toast.success('Settings saved successfully.', {
-        position: 'bottom-center',
-        theme: 'dark',
-      });
+      toast.success('Settings saved successfully.');
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      toast.error('Failed to save settings.', {
-        position: 'bottom-center',
-        theme: 'dark',
-      });
+      toast.error('Failed to save settings.');
     }
   };
 

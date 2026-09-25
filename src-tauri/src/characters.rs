@@ -1,7 +1,8 @@
-use crate::{app_settings, character_repository, save_reader};
+use crate::{app_settings, character_repository, imports, save_reader};
 use serde::Serialize;
 use serde_json::Value;
 use std::path::PathBuf;
+use tauri::AppHandle;
 
 #[derive(Serialize)]
 pub struct ActiveCharacter {
@@ -86,4 +87,35 @@ pub async fn get_character_versions(
             is_latest: index == 0,
         })
         .collect())
+}
+
+pub async fn backup(
+    app: &AppHandle,
+    pool: &sqlx::SqlitePool,
+    state: &app_settings::SettingsState,
+    slot_number: u32,
+) -> Result<imports::ImportResult, String> {
+    let settings = app_settings::get_settings(state).await?;
+
+    let character_file_index = slot_number
+        .checked_sub(1)
+        .ok_or_else(|| "Slot number must be at least 1.".to_string())?;
+
+    let game_installation_path = settings
+        .get("gameInstallationPath")
+        .and_then(Value::as_str)
+        .ok_or_else(|| "gameInstallationPath must be a string.".to_string())?;
+    let character_save_path = PathBuf::from(game_installation_path)
+        .join("save")
+        .join(format!("Hero{character_file_index:02}.pax"))
+        .to_string_lossy()
+        .into_owned();
+
+    // backup is nothing else but importing from game saves directory
+    let import_results = imports::import_characters(app, pool, vec![character_save_path]).await?;
+
+    import_results
+        .into_iter()
+        .next()
+        .ok_or_else(|| "No character to back up.".to_string())
 }

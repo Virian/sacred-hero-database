@@ -8,22 +8,30 @@ import styles from './CharacterCard.module.scss';
 interface CharacterCardProps {
   cardNumber?: number;
   character: Omit<Character, 'version'>;
-  onBackup?: (character: Omit<Character, 'version'>) => void;
-  onRemove?: (character: Omit<Character, 'version'>) => void;
+  isBackupLoading?: boolean;
+  onBackup?: (
+    character: Omit<Character, 'version'>,
+    cardNumber?: number,
+  ) => void;
+  onRemove?: (
+    character: Omit<Character, 'version'>,
+    cardNumber?: number,
+  ) => void;
 }
 
 export const CharacterCard = ({
   cardNumber,
   character,
+  isBackupLoading = false,
   onBackup,
   onRemove,
 }: CharacterCardProps) => {
   const handleBackup = () => {
-    onBackup?.(character);
+    onBackup?.(character, cardNumber);
   };
 
   const handleRemove = () => {
-    onRemove?.(character);
+    onRemove?.(character, cardNumber);
   };
 
   return (
@@ -45,6 +53,7 @@ export const CharacterCard = ({
           <Button
             variant="secondary"
             className={styles.button}
+            isLoading={isBackupLoading}
             onClick={handleBackup}
           >
             <span className={styles.buttonText}>
