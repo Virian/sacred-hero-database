@@ -71,6 +71,18 @@ pub async fn get_character_by_id(
         .map_err(|error| format!("Could not get character by id: {error}"))
 }
 
+pub async fn delete_character(pool: &sqlx::SqlitePool, character_id: String) -> Result<(), String> {
+    let affected_rows = character_repository::delete_character(pool, &character_id)
+        .await
+        .map_err(|error| format!("Could not delete character: {error}"))?;
+
+    if affected_rows == 0 {
+        return Err(format!("Character {character_id} was not found."));
+    }
+
+    Ok(())
+}
+
 pub async fn get_character_versions(
     pool: &sqlx::SqlitePool,
     character_id: String,

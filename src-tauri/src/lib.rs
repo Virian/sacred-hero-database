@@ -38,6 +38,7 @@ pub fn run() {
             commands::get_all_characters,
             commands::get_all_characters_count,
             commands::get_character_by_id,
+            commands::delete_character,
             commands::get_character_versions,
             commands::backup,
             commands::import_characters
