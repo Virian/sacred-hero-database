@@ -138,6 +138,9 @@ export const CharactersDatabase = () => {
       await deleteCharacter({ characterId: selectedCharacter.id });
       setSelectedCharacter(null);
       setIsDeleteModalOpen(false);
+      toast.success(
+        `Deleted "${selectedCharacter.name}" and all saved versions.`,
+      );
       refetchCharacters();
       refetchCharactersCount();
     } catch (error) {
