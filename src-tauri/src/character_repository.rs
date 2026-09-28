@@ -14,6 +14,7 @@ pub struct CharacterVersionDetails {
     pub play_time_seconds: i64,
     pub modified_at: String,
     pub created_at: String,
+    pub character_id: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -40,6 +41,7 @@ struct CharacterWithLatestVersionRow {
     latest_version_play_time_seconds: Option<i64>,
     latest_version_modified_at: Option<String>,
     latest_version_created_at: Option<String>,
+    latest_version_character_id: Option<String>,
 }
 
 #[derive(Debug, Serialize, sqlx::FromRow)]
@@ -66,7 +68,8 @@ pub async fn get_all_characters(
             latest.survival_bonus AS latest_version_survival_bonus,
             latest.play_time_seconds AS latest_version_play_time_seconds,
             latest.modified_at AS latest_version_modified_at,
-            latest.created_at AS latest_version_created_at
+            latest.created_at AS latest_version_created_at,
+            latest.character_id AS latest_version_character_id
         FROM characters
         LEFT JOIN character_versions
             ON character_versions.character_id = characters.id
@@ -83,7 +86,7 @@ pub async fn get_all_characters(
         GROUP BY characters.id, characters.name, characters.class,
             latest.id, latest.version_number, latest.level, latest.hardcore,
             latest.deaths, latest.survival_bonus, latest.play_time_seconds,
-            latest.modified_at, latest.created_at
+            latest.modified_at, latest.created_at, latest.character_id
         ORDER BY latest.created_at DESC, characters.name COLLATE NOCASE, characters.id",
     )
     .fetch_all(pool)
@@ -116,6 +119,9 @@ pub async fn get_all_characters(
                 created_at: row
                     .latest_version_created_at
                     .expect("latest version created date"),
+                character_id: row
+                    .latest_version_character_id
+                    .expect("latest version character id"),
             }),
         })
         .collect())
@@ -251,7 +257,8 @@ pub async fn get_character_versions(
         survival_bonus,
         play_time_seconds,
         modified_at,
-        created_at
+        created_at,
+        character_id
     FROM character_versions
     WHERE character_id = ?
     ORDER BY modified_at DESC, id DESC",
@@ -259,6 +266,51 @@ pub async fn get_character_versions(
     .bind(character_id)
     .fetch_all(pool)
     .await
+}
+
+pub async fn get_character_version_by_id(
+    pool: &sqlx::SqlitePool,
+    character_version_id: &str,
+) -> Result<Option<CharacterVersionDetails>, sqlx::Error> {
+    sqlx::query_as::<_, CharacterVersionDetails>(
+        "SELECT
+        id,
+        version_number,
+        level,
+        hardcore,
+        deaths,
+        survival_bonus,
+        play_time_seconds,
+        modified_at,
+        created_at,
+        character_id
+      FROM character_versions
+      WHERE id = ?",
+    )
+    .bind(character_version_id)
+    .fetch_optional(pool)
+    .await
+}
+
+pub async fn count_character_versions(
+    transaction: &mut Transaction<'_, Sqlite>,
+    character_id: &str,
+) -> Result<i64, sqlx::Error> {
+    sqlx::query_scalar("SELECT COUNT(*) FROM character_versions WHERE character_id = ?")
+        .bind(character_id)
+        .fetch_one(&mut **transaction)
+        .await
+}
+
+pub async fn delete_character_version(
+    transaction: &mut Transaction<'_, Sqlite>,
+    character_version_id: &str,
+) -> Result<u32, sqlx::Error> {
+    sqlx::query("DELETE FROM character_versions WHERE id = ?")
+        .bind(character_version_id)
+        .execute(&mut **transaction)
+        .await
+        .map(|result| result.rows_affected() as u32)
 }
 
 fn strip_character_formatting(value: &str) -> String {

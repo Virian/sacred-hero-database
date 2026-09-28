@@ -40,6 +40,7 @@ pub fn run() {
             commands::get_character_by_id,
             commands::delete_character,
             commands::get_character_versions,
+            commands::delete_character_version,
             commands::backup,
             commands::import_characters
         ])
