@@ -11,23 +11,16 @@ import { Tooltip } from 'react-tooltip';
 
 import { Badge, Menu, MenuOption, SettingsError, Spinner } from '../';
 import { Routes } from '../../constants';
-import { SettingsContext } from '../../context';
-import { Commands } from '../../enums';
-import { useInvokeQuery } from '../../hooks';
-import type { GetAllCharactersCountCommandResponse } from '../../types';
+import { CharactersCountContext, SettingsContext } from '../../context';
 
 import styles from './AppLayout.module.scss';
 
 export const AppLayout = () => {
   const { settings, isInitialized, initializationError } =
     useContext(SettingsContext);
+  const { charactersCount } = useContext(CharactersCountContext);
 
   const isGameInstallationPathMissing = !settings.gameInstallationPath;
-
-  const { data: charactersCount } =
-    useInvokeQuery<GetAllCharactersCountCommandResponse>({
-      command: Commands.GET_ALL_CHARACTERS_COUNT,
-    });
 
   const renderCountBadge = () => {
     if (!charactersCount) {

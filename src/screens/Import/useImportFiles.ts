@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { open } from '@tauri-apps/plugin-dialog';
 
+import { CharactersCountContext } from '../../context';
 import { Commands } from '../../enums';
 import { useInvokeMutation } from '../../hooks';
 import type {
@@ -14,6 +15,10 @@ import { type ImportResult, mapImportCommandResponse } from '../../utils';
 import { isPointInRect } from './isPointInRect';
 
 export const useImportFiles = () => {
+  const { refetch: refetchCharactersCount } = useContext(
+    CharactersCountContext,
+  );
+
   const dropAreaRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -104,6 +109,7 @@ export const useImportFiles = () => {
             setImportResults([]);
             const data = await importCharacters({ filePaths: savesPaths });
             setImportResults(data);
+            refetchCharactersCount();
             toast.info('Import process finished.');
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
           } catch (error) {
@@ -151,6 +157,7 @@ export const useImportFiles = () => {
       setImportResults([]);
       const data = await importCharacters({ filePaths });
       setImportResults(data);
+      refetchCharactersCount();
       toast.info('Import process finished.');
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {

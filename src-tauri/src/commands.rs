@@ -52,6 +52,15 @@ pub async fn get_character_by_id(
 }
 
 #[tauri::command]
+pub async fn delete_character(
+    app: tauri::AppHandle,
+    pool: tauri::State<'_, sqlx::SqlitePool>,
+    character_id: String,
+) -> Result<(), String> {
+    characters::delete_character(&app, &pool, character_id).await
+}
+
+#[tauri::command]
 pub async fn get_character_versions(
     pool: tauri::State<'_, sqlx::SqlitePool>,
     character_id: String,
