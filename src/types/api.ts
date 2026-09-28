@@ -88,7 +88,12 @@ export type GetCharacterVersionsCommandResponse = {
   play_time_seconds: number;
   modified_at: string;
   created_at: string;
+  character_id: string;
 }[];
+
+export interface DeleteCharacterVersionCommandParams {
+  characterVersionId: string;
+}
 
 export interface ImportCharactersCommandParams {
   filePaths: string[];

@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
+import { toast } from 'react-toastify';
 import clsx from 'clsx';
 import { ChevronRight } from 'lucide-react';
 
@@ -7,14 +8,17 @@ import {
   Button,
   CharacterOverview,
   CharacterTable,
+  ConfirmModal,
   Spinner,
   type ColumnDefinition,
 } from '../../components';
 import { Routes } from '../../constants';
+import { CharactersCountContext } from '../../context';
 import { Commands } from '../../enums';
-import { useInvokeQuery } from '../../hooks';
+import { useInvokeMutation, useInvokeQuery } from '../../hooks';
 import type {
   Character,
+  DeleteCharacterVersionCommandParams,
   GetCharacterByIdCommandParams,
   GetCharacterByIdCommandResponse,
   GetCharacterVersionsCommandParams,
@@ -23,21 +27,10 @@ import type {
 import { stripCharacterFormatting } from '../../utils';
 
 import styles from './CharacterVersions.module.scss';
+import type { CharacterRow } from './CharacterVersions.types';
+import { mapGetCharacterVersionsCommandResponse } from './mapGetCharacterVersionsCommandResponse';
 
 type CharacterData = Pick<Character, 'id' | 'name' | 'characterClass'>;
-
-interface CharacterRow {
-  id: string;
-  version: number;
-  level: number;
-  isHardcore: boolean;
-  deathCount: number;
-  survivalBonus: number;
-  playTime: number;
-  modifiedAt: Date;
-  createdAt: Date;
-  isLatest: boolean;
-}
 
 const modifiedDateColumn: ColumnDefinition<CharacterRow, Date> = {
   id: 'modifiedAt',
@@ -93,54 +86,30 @@ const columnDefinitions: ColumnDefinition<CharacterRow>[] = [
 export const CharacterVersions = () => {
   const navigate = useNavigate();
   const { characterId = '' } = useParams();
+  const { refetch: refetchCharactersCount } = useContext(
+    CharactersCountContext,
+  );
 
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedVersion, setSelectedVersion] = useState<CharacterRow | null>(
     null,
   );
 
-  const { data: characterVersions, isLoading: isLoadingCharacterVersions } =
-    useInvokeQuery<
-      GetCharacterVersionsCommandResponse,
-      CharacterRow[],
-      GetCharacterVersionsCommandParams
-    >({
-      command: Commands.GET_CHARACTER_VERSIONS,
-      args: { characterId },
-      mapper: (response) =>
-        response
-          // Double reversing because data comes from backend with the first
-          // element being the latest version. We want to have the lowest version
-          // number to be the oldest version.
-          .reverse()
-          .map(
-            (
-              {
-                id,
-                is_latest,
-                level,
-                hardcore,
-                deaths,
-                survival_bonus,
-                play_time_seconds,
-                modified_at,
-                created_at,
-              },
-              index,
-            ) => ({
-              id,
-              version: index + 1,
-              isLatest: is_latest,
-              level,
-              isHardcore: hardcore,
-              deathCount: deaths,
-              survivalBonus: survival_bonus,
-              playTime: play_time_seconds,
-              modifiedAt: new Date(modified_at),
-              createdAt: new Date(created_at),
-            }),
-          )
-          .reverse(),
-    });
+  const args = useMemo(() => ({ characterId }), [characterId]);
+
+  const {
+    data: characterVersions,
+    isLoading: isLoadingCharacterVersions,
+    refetch: refetchCharacterVersions,
+  } = useInvokeQuery<
+    GetCharacterVersionsCommandResponse,
+    CharacterRow[],
+    GetCharacterVersionsCommandParams
+  >({
+    command: Commands.GET_CHARACTER_VERSIONS,
+    args,
+    mapper: mapGetCharacterVersionsCommandResponse,
+  });
 
   const { data: characterData, isLoading: isLoadingCharacterData } =
     useInvokeQuery<
@@ -149,13 +118,18 @@ export const CharacterVersions = () => {
       GetCharacterByIdCommandParams
     >({
       command: Commands.GET_CHARACTER_BY_ID,
-      args: { characterId },
+      args,
       mapper: (response) =>
         response && {
           id: response.id,
           characterClass: response.class,
           name: stripCharacterFormatting(response.name),
         },
+    });
+
+  const { invoke: deleteCharacterVersion, isLoading: isDeleteLoading } =
+    useInvokeMutation<DeleteCharacterVersionCommandParams>({
+      command: Commands.DELETE_CHARACTER_VERSION,
     });
 
   const isLoading = isLoadingCharacterVersions || isLoadingCharacterData;
@@ -165,6 +139,34 @@ export const CharacterVersions = () => {
       ({ id }) => id === versionId,
     );
     setSelectedVersion(clickedCharacterVersion || null);
+  };
+
+  const handleDeleteCharacterVersion = async () => {
+    if (!selectedVersion) {
+      toast.error('No character version is selected to delete.');
+      return;
+    }
+
+    try {
+      const isLastVersion = characterVersions?.length === 1;
+      await deleteCharacterVersion({ characterVersionId: selectedVersion.id });
+      setSelectedVersion(null);
+      setIsDeleteModalOpen(false);
+      toast.success('Character version deleted successfully.');
+
+      if (isLastVersion) {
+        refetchCharactersCount();
+        navigate(`/${Routes.CHARACTERS_DATBASE}`);
+      } else {
+        refetchCharacterVersions();
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      toast.error(
+        `Failed to delete version ${selectedVersion.id}: ${errorMessage}`,
+      );
+    }
   };
 
   return (
@@ -208,7 +210,7 @@ export const CharacterVersions = () => {
                   : `Version ${selectedVersion.version}`
               }
               onActivate={() => null}
-              onDelete={() => null}
+              onDelete={() => setIsDeleteModalOpen(true)}
             />
           )}
         </div>
@@ -223,6 +225,17 @@ export const CharacterVersions = () => {
       >
         Back
       </Button>
+      <ConfirmModal
+        title="Delete character version"
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteCharacterVersion}
+        isLoading={isDeleteLoading}
+      >
+        This will permanently delete the selected version. If it is the
+        character&apos;s last saved version, the character and its save data
+        will also be deleted.
+      </ConfirmModal>
     </div>
   );
 };

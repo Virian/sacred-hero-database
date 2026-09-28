@@ -9,6 +9,7 @@ export const Commands = {
   DELETE_CHARACTER: 'delete_character',
 
   GET_CHARACTER_VERSIONS: 'get_character_versions',
+  DELETE_CHARACTER_VERSION: 'delete_character_version',
 
   BACKUP: 'backup',
   IMPORT_CHARACTERS: 'import_characters',
