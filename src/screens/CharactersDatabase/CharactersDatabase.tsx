@@ -1,18 +1,24 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router';
+import { toast } from 'react-toastify';
 import isNil from 'lodash/isNil';
 
 import {
   CharacterOverview,
   CharacterPortrait,
   CharacterTable,
+  ConfirmModal,
   Spinner,
   type ColumnDefinition,
 } from '../../components';
 import { Routes } from '../../constants';
+import { CharactersCountContext } from '../../context';
 import { CharacterClass, Commands } from '../../enums';
-import { useInvokeQuery } from '../../hooks';
-import type { GetAllCharactersCommandResponse } from '../../types';
+import { useInvokeMutation, useInvokeQuery } from '../../hooks';
+import type {
+  DeleteCharacterCommandParams,
+  GetAllCharactersCommandResponse,
+} from '../../types';
 import { stripCharacterFormatting } from '../../utils';
 
 import { CharacterDetails } from './CharacterDetails/CharacterDetails';
@@ -71,13 +77,19 @@ const columnDefinitions: ColumnDefinition<CharacterRow>[] = [
 export const CharactersDatabase = () => {
   const navigate = useNavigate();
 
+  const { refetch: refetchCharactersCount } = useContext(
+    CharactersCountContext,
+  );
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedCharacter, setSelectedCharacter] =
     useState<MappedCharacter | null>(null);
 
-  const { data: characters, isLoading } = useInvokeQuery<
-    GetAllCharactersCommandResponse,
-    MappedCharacter[]
-  >({
+  const {
+    data: characters,
+    isLoading,
+    refetch: refetchCharacters,
+  } = useInvokeQuery<GetAllCharactersCommandResponse, MappedCharacter[]>({
     command: Commands.GET_ALL_CHARACTERS,
     mapper: (data) =>
       data.map((character) => ({
@@ -97,6 +109,11 @@ export const CharactersDatabase = () => {
       })),
   });
 
+  const { invoke: deleteCharacter, isLoading: isDeleteLoading } =
+    useInvokeMutation<DeleteCharacterCommandParams>({
+      command: Commands.DELETE_CHARACTER,
+    });
+
   const handleRowClick = (characterId: string) => {
     const clickedCharacter = characters?.find(({ id }) => id === characterId);
     setSelectedCharacter(clickedCharacter || null);
@@ -109,6 +126,27 @@ export const CharactersDatabase = () => {
         id,
       ),
     );
+  };
+
+  const handleDeleteCharacter = async () => {
+    if (!selectedCharacter) {
+      toast.error('No character is selected to delete.');
+      return;
+    }
+
+    try {
+      await deleteCharacter({ characterId: selectedCharacter.id });
+      setSelectedCharacter(null);
+      setIsDeleteModalOpen(false);
+      refetchCharacters();
+      refetchCharactersCount();
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      toast.error(
+        `Failed to delete "${selectedCharacter.name}": ${errorMessage}`,
+      );
+    }
   };
 
   return (
@@ -150,7 +188,7 @@ export const CharactersDatabase = () => {
                   overviewText={`${selectedCharacter.versionCount} version(s)`}
                   onActivate={() => null}
                   onViewVersions={handleViewVersions}
-                  onDelete={() => null}
+                  onDelete={() => setIsDeleteModalOpen(true)}
                 />
                 <CharacterDetails
                   isHardcore={selectedCharacter.isHardcore}
@@ -164,6 +202,16 @@ export const CharactersDatabase = () => {
           ) : null}
         </div>
       )}
+      <ConfirmModal
+        title="Delete character"
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteCharacter}
+        isLoading={isDeleteLoading}
+      >
+        This will permanently delete the selected character and all of its saved
+        versions.
+      </ConfirmModal>
     </div>
   );
 };

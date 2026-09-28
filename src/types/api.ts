@@ -69,6 +69,10 @@ export type GetCharacterByIdCommandResponse = {
   class: CharacterClass;
 } | null;
 
+export interface DeleteCharacterCommandParams {
+  characterId: string;
+}
+
 export type GetCharacterVersionsCommandParams = {
   characterId: string;
 };

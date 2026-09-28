@@ -9,6 +9,7 @@ interface ConfirmModalProps {
   title?: string;
   children: React.ReactNode;
   confirmButtonLabel?: string;
+  isLoading?: boolean;
 }
 
 export const ConfirmModal = ({
@@ -18,6 +19,7 @@ export const ConfirmModal = ({
   title,
   children,
   confirmButtonLabel = 'Confirm',
+  isLoading = false,
 }: ConfirmModalProps) => (
   <Modal
     isOpen={isOpen}
@@ -33,7 +35,12 @@ export const ConfirmModal = ({
         >
           Cancel
         </Button>
-        <Button onClick={onConfirm}>{confirmButtonLabel}</Button>
+        <Button
+          isLoading={isLoading}
+          onClick={onConfirm}
+        >
+          {confirmButtonLabel}
+        </Button>
       </div>
     </div>
   </Modal>
