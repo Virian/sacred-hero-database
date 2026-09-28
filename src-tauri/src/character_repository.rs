@@ -168,12 +168,12 @@ pub async fn find_character_id_by_name_and_class(
 }
 
 pub async fn delete_character(
-    pool: &sqlx::SqlitePool,
+    transaction: &mut Transaction<'_, Sqlite>,
     character_id: &str,
 ) -> Result<u32, sqlx::Error> {
     sqlx::query("DELETE FROM characters WHERE id = ?")
         .bind(character_id)
-        .execute(pool)
+        .execute(&mut **transaction)
         .await
         .map(|result| result.rows_affected() as u32)
 }

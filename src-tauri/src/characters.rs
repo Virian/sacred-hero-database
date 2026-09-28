@@ -2,7 +2,7 @@ use crate::{app_settings, character_repository, imports, save_reader};
 use serde::Serialize;
 use serde_json::Value;
 use std::path::PathBuf;
-use tauri::AppHandle;
+use tauri::{AppHandle, Manager};
 
 #[derive(Serialize)]
 pub struct ActiveCharacter {
@@ -71,14 +71,48 @@ pub async fn get_character_by_id(
         .map_err(|error| format!("Could not get character by id: {error}"))
 }
 
-pub async fn delete_character(pool: &sqlx::SqlitePool, character_id: String) -> Result<(), String> {
-    let affected_rows = character_repository::delete_character(pool, &character_id)
+pub async fn delete_character(
+    app: &AppHandle,
+    pool: &sqlx::SqlitePool,
+    character_id: String,
+) -> Result<(), String> {
+    let mut transaction = pool
+        .begin()
+        .await
+        .map_err(|error| format!("Could not start character deletion: {error}"))?;
+    let affected_rows = character_repository::delete_character(&mut transaction, &character_id)
         .await
         .map_err(|error| format!("Could not delete character: {error}"))?;
 
     if affected_rows == 0 {
         return Err(format!("Character {character_id} was not found."));
     }
+
+    let saves_directory = app
+        .path()
+        .app_data_dir()
+        .map_err(|error| format!("Could not locate app data directory: {error}"))?
+        .join("saves")
+        .join(&character_id);
+
+    match tokio::fs::remove_dir_all(&saves_directory).await {
+        Ok(()) => {}
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+        Err(error) => {
+            transaction
+                .rollback()
+                .await
+                .map_err(|rollback_error| {
+                    format!("Could not remove character save files: {error}; could not roll back database deletion: {rollback_error}")
+                })?;
+            return Err(format!("Could not remove character save files: {error}"));
+        }
+    }
+
+    transaction
+        .commit()
+        .await
+        .map_err(|error| format!("Could not commit character deletion: {error}"))?;
 
     Ok(())
 }
