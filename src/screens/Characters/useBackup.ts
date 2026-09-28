@@ -43,11 +43,9 @@ export const useBackup = () => {
       }
       toast.error(`Character backup failed: ${response.message}`);
     } catch (error) {
-      if (error instanceof Error) {
-        return toast.error(`Character backup failed: ${error.message}`);
-      }
-
-      toast.error('Character backup failed.');
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      toast.error(`Character backup failed: ${errorMessage}`);
     } finally {
       setBackedUpCardNumber(undefined);
     }
