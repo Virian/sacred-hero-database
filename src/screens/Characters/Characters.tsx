@@ -1,13 +1,18 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { Link } from 'react-router';
+import { toast } from 'react-toastify';
 import { CircleX, RefreshCw } from 'lucide-react';
 
 import { Button, Spinner } from '../../components';
 import { Routes } from '../../constants';
-import { SettingsContext } from '../../context';
+import { CharactersCountContext, SettingsContext } from '../../context';
+import { Commands } from '../../enums';
+import { useInvokeMutation } from '../../hooks';
+import type { Character, RemoveFromSlotCommandParams } from '../../types';
 
 import styles from './Characters.module.scss';
 import { CharacterCard, EmptyCharacterCard } from './CharacterCard';
+import { ConfirmRemoveModal } from './ConfirmRemoveModal/ConfirmRemoveModal';
 import { useActiveCharacters } from './useActiveCharacters';
 import { useBackup } from './useBackup';
 
@@ -15,6 +20,21 @@ export const Characters = () => {
   const {
     settings: { gameInstallationPath, activeCharacterSlots },
   } = useContext(SettingsContext);
+  const { refetch: refetchCharactersCount } = useContext(
+    CharactersCountContext,
+  );
+
+  const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false);
+  const [characterToRemove, setCharacterToRemove] = useState<{
+    character: Omit<Character, 'version'>;
+    slotNumber: number;
+  } | null>(null);
+  const [isRemoveFromSlotLoading, setIsRemoveFromSlotLoading] = useState(false);
+
+  const { invoke: removeFromSlotCommand } =
+    useInvokeMutation<RemoveFromSlotCommandParams>({
+      command: Commands.REMOVE_FROM_SLOT,
+    });
 
   const {
     activeCharacters,
@@ -28,6 +48,56 @@ export const Characters = () => {
     isLoading: isBackupLoading,
     handleBackup,
   } = useBackup();
+
+  const handleCardRemove = (
+    character: Omit<Character, 'version'>,
+    slotNumber?: number,
+  ) => {
+    setCharacterToRemove({
+      character: character,
+      slotNumber: slotNumber || 0,
+    });
+    setIsRemoveModalOpen(true);
+  };
+
+  const removeFromSlot = async (shouldBackup: boolean) => {
+    if (!characterToRemove) {
+      return;
+    }
+
+    try {
+      setIsRemoveFromSlotLoading(true);
+
+      if (shouldBackup) {
+        const backupSucceeded = await handleBackup(
+          characterToRemove.character,
+          characterToRemove.slotNumber,
+        );
+
+        // don't proceed if backup failed
+        // toast error is already shown by `handleBackup`
+        if (!backupSucceeded) {
+          return;
+        }
+      }
+
+      await removeFromSlotCommand({ slotNumber: characterToRemove.slotNumber });
+      setIsRemoveModalOpen(false);
+      toast.success(
+        `Removed "${characterToRemove.character.name}" from slot ${characterToRemove.slotNumber}.`,
+      );
+      refetchActiveCharacters();
+      refetchCharactersCount();
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      toast.error(
+        `Removing "${characterToRemove.character.name}" from slot ${characterToRemove.slotNumber} failed: ${errorMessage}`,
+      );
+    } finally {
+      setIsRemoveFromSlotLoading(false);
+    }
+  };
 
   const renderContent = () => {
     if (!gameInstallationPath) {
@@ -73,6 +143,7 @@ export const Characters = () => {
                   isBackupLoading && backedUpCardNumber === index + 1
                 }
                 onBackup={handleBackup}
+                onRemove={handleCardRemove}
               />
             ) : (
               <EmptyCharacterCard
@@ -94,6 +165,14 @@ export const Characters = () => {
             </span>
           </Button>
         </div>
+        <ConfirmRemoveModal
+          isOpen={isRemoveModalOpen}
+          onClose={() => setIsRemoveModalOpen(false)}
+          onConfirm={removeFromSlot}
+          isLoading={isRemoveFromSlotLoading}
+          characterName={characterToRemove?.character.name || ''}
+          slotNumber={characterToRemove?.slotNumber || 0}
+        />
       </>
     );
   };

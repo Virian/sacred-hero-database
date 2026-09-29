@@ -127,3 +127,7 @@ export interface BackupCommandParams {
 }
 
 export type BackupCommandResponse = ImportResult;
+
+export interface RemoveFromSlotCommandParams {
+  slotNumber: number;
+}
