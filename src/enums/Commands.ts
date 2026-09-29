@@ -12,6 +12,7 @@ export const Commands = {
   DELETE_CHARACTER_VERSION: 'delete_character_version',
 
   BACKUP: 'backup',
+  REMOVE_FROM_SLOT: 'remove_from_slot',
   IMPORT_CHARACTERS: 'import_characters',
 } as const;
 

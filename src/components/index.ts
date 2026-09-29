@@ -7,6 +7,7 @@ export {
   CharacterTable,
   type ColumnDefinition,
 } from './CharacterTable/CharacterTable';
+export { Checkbox } from './Checkbox/Checkbox';
 export { ConfirmModal } from './ConfirmModal/ConfirmModal';
 export { ErrorBoundary } from './ErrorBoundary/ErrorBoundary';
 export { ErrorState } from './ErrorState/ErrorState';
