@@ -135,6 +135,96 @@ pub async fn get_character_versions(
         .collect())
 }
 
+pub async fn delete_character_version(
+    app: &AppHandle,
+    pool: &sqlx::SqlitePool,
+    character_version_id: String,
+) -> Result<(), String> {
+    let character_version =
+        character_repository::get_character_version_by_id(pool, &character_version_id)
+            .await
+            .map_err(|error| format!("Could not find parent character: {error}"))?
+            .ok_or_else(|| format!("Character version {character_version_id} was not found."))?;
+
+    let mut transaction = pool
+        .begin()
+        .await
+        .map_err(|error| format!("Could not start character version deletion: {error}"))?;
+    let affected_rows =
+        character_repository::delete_character_version(&mut transaction, &character_version_id)
+            .await
+            .map_err(|error| format!("Could not delete character version: {error}"))?;
+
+    if affected_rows == 0 {
+        return Err(format!(
+            "Character version {character_version_id} was not found."
+        ));
+    }
+
+    let has_remaining_versions = character_repository::count_character_versions(
+        &mut transaction,
+        &character_version.character_id,
+    )
+    .await
+    .map_err(|error| format!("Could not count remaining character versions: {error}"))?
+        > 0;
+
+    if !has_remaining_versions {
+        let affected_rows = character_repository::delete_character(
+            &mut transaction,
+            &character_version.character_id,
+        )
+        .await
+        .map_err(|error| format!("Could not delete parent character: {error}"))?;
+
+        if affected_rows == 0 {
+            return Err(format!(
+                "Parent character {} was not found.",
+                character_version.character_id
+            ));
+        }
+    }
+
+    let saves_directory = app
+        .path()
+        .app_data_dir()
+        .map_err(|error| format!("Could not locate app data directory: {error}"))?
+        .join("saves")
+        .join(character_version.character_id);
+
+    let cleanup_result = if has_remaining_versions {
+        tokio::fs::remove_file(saves_directory.join(format!("{character_version_id}.pax"))).await
+    } else {
+        tokio::fs::remove_dir_all(&saves_directory).await
+    };
+
+    match cleanup_result {
+        Ok(()) => {}
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+        Err(error) => {
+            let cleanup_target = if has_remaining_versions {
+                "character version save file"
+            } else {
+                "character save directory"
+            };
+            transaction
+                .rollback()
+                .await
+                .map_err(|rollback_error| {
+                    format!("Could not remove {cleanup_target}: {error}; could not roll back database deletion: {rollback_error}")
+                })?;
+            return Err(format!("Could not remove {cleanup_target}: {error}"));
+        }
+    }
+
+    transaction
+        .commit()
+        .await
+        .map_err(|error| format!("Could not commit character version deletion: {error}"))?;
+
+    Ok(())
+}
+
 pub async fn backup(
     app: &AppHandle,
     pool: &sqlx::SqlitePool,

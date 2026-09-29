@@ -69,6 +69,15 @@ pub async fn get_character_versions(
 }
 
 #[tauri::command]
+pub async fn delete_character_version(
+    app: tauri::AppHandle,
+    pool: tauri::State<'_, sqlx::SqlitePool>,
+    character_version_id: String,
+) -> Result<(), String> {
+    characters::delete_character_version(&app, &pool, character_version_id).await
+}
+
+#[tauri::command]
 pub async fn backup(
     app: tauri::AppHandle,
     pool: tauri::State<'_, sqlx::SqlitePool>,
