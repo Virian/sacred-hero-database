@@ -88,6 +88,14 @@ pub async fn backup(
 }
 
 #[tauri::command]
+pub async fn remove_from_slot(
+    state: tauri::State<'_, app_settings::SettingsState>,
+    slot_number: u32,
+) -> Result<(), String> {
+    characters::remove_from_slot(&state, slot_number).await
+}
+
+#[tauri::command]
 pub async fn import_characters(
     app: tauri::AppHandle,
     pool: tauri::State<'_, sqlx::SqlitePool>,

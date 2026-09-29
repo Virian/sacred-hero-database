@@ -255,3 +255,34 @@ pub async fn backup(
         .next()
         .ok_or_else(|| "No character to back up.".to_string())
 }
+
+pub async fn remove_from_slot(
+    state: &app_settings::SettingsState,
+    slot_number: u32,
+) -> Result<(), String> {
+    let settings = app_settings::get_settings(state).await?;
+
+    let character_file_index = slot_number
+        .checked_sub(1)
+        .ok_or_else(|| "Slot number must be at least 1.".to_string())?;
+
+    let game_installation_path = settings
+        .get("gameInstallationPath")
+        .and_then(Value::as_str)
+        .ok_or_else(|| "gameInstallationPath must be a string.".to_string())?;
+    let character_save_path = PathBuf::from(game_installation_path)
+        .join("save")
+        .join(format!("Hero{character_file_index:02}.pax"));
+
+    match tokio::fs::remove_file(character_save_path).await {
+        Ok(()) => {}
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+        Err(error) => {
+            return Err(format!(
+                "Could not remove character from slot {slot_number}: {error}"
+            ))
+        }
+    }
+
+    Ok(())
+}
