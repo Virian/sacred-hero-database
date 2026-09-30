@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext } from 'react';
 import { Outlet } from 'react-router';
 import {
   Users,
@@ -8,11 +8,11 @@ import {
   TriangleAlert,
 } from 'lucide-react';
 import { Tooltip } from 'react-tooltip';
-import { getVersion } from '@tauri-apps/api/app';
 
 import { Badge, Menu, MenuOption, SettingsError, Spinner } from '../';
 import { Routes } from '../../constants';
 import { CharactersCountContext, SettingsContext } from '../../context';
+import { useAppVersion } from '../../hooks';
 
 import styles from './AppLayout.module.scss';
 
@@ -21,17 +21,9 @@ export const AppLayout = () => {
     useContext(SettingsContext);
   const { charactersCount } = useContext(CharactersCountContext);
 
-  const [appVersion, setAppVersion] = useState('');
+  const appVersion = useAppVersion();
 
   const isGameInstallationPathMissing = !settings.gameInstallationPath;
-
-  useEffect(() => {
-    const getAppVersion = async () => {
-      setAppVersion(await getVersion());
-    };
-
-    getAppVersion();
-  }, []);
 
   const renderCountBadge = () => {
     if (!charactersCount) {
