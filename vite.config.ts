@@ -1,6 +1,7 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
 import react, { reactCompilerPreset } from '@vitejs/plugin-react';
+import svgr from 'vite-plugin-svgr';
 import babel from '@rolldown/plugin-babel';
 import process from 'node:process';
 
@@ -8,7 +9,7 @@ const host = process.env.TAURI_DEV_HOST;
 
 // https://vite.dev/config/
 export default defineConfig(() => ({
-  plugins: [react(), babel({ presets: [reactCompilerPreset()] })],
+  plugins: [react(), babel({ presets: [reactCompilerPreset()] }), svgr()],
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //

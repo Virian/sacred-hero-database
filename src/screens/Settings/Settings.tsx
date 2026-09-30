@@ -3,11 +3,13 @@ import { Formik, type FormikHelpers } from 'formik';
 import { X, Save } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { open } from '@tauri-apps/plugin-dialog';
+import { openUrl } from '@tauri-apps/plugin-opener';
 
+import GithubIcon from '../../assets/github.svg?react';
 import { Button, Input, RadioGroup } from '../../components';
 import { SettingsContext } from '../../context';
 import { Commands } from '../../enums';
-import { useInvokeMutation } from '../../hooks';
+import { useAppVersion, useInvokeMutation } from '../../hooks';
 import type { UpdateSettingsCommandParams } from '../../types';
 
 import { validate } from './validate';
@@ -17,6 +19,9 @@ import styles from './Settings.module.scss';
 
 export const Settings = () => {
   const { settings, fetchSettings } = useContext(SettingsContext);
+
+  const appVersion = useAppVersion();
+
   const { invoke: updateSettings, isLoading: isUpdatingSettings } =
     useInvokeMutation<UpdateSettingsCommandParams>({
       command: Commands.UPDATE_SETTINGS,
@@ -55,6 +60,10 @@ export const Settings = () => {
     if (installationPath) {
       setFieldValue('installationPath', installationPath || '', true);
     }
+  };
+
+  const openGithubPage = () => {
+    openUrl('https://github.com/Virian/sacred-hero-database');
   };
 
   return (
@@ -145,6 +154,21 @@ export const Settings = () => {
               database still keeps all characters and versions regardless of
               this setting.
             </p>
+          </div>
+          <div className={styles.section}>
+            <h2 className={styles.sectionTitle}>About</h2>
+            <span className={styles.appName}>Sacred Hero Database</span>
+            <span className={styles.appVersion}>Version {appVersion}</span>
+            <span className={styles.createdBy}>
+              Created by{' '}
+              <a
+                href="#"
+                className={styles.githubLink}
+                onClick={openGithubPage}
+              >
+                Virian <GithubIcon className={styles.githubIcon} />
+              </a>
+            </span>
           </div>
         </form>
       )}

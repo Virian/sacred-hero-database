@@ -4,6 +4,7 @@
   flex-direction: column;
   gap: 0.5rem;
   padding: 1rem;
+  overflow: auto;
 }
 
 .header {
@@ -43,7 +44,7 @@
 }
 
 .sectionTitle {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -65,4 +66,43 @@
 .activeCharacterSlotsDescription {
   font-size: 0.75rem;
   color: var(--text-secondary);
+}
+
+.appName {
+  font-size: 0.875rem;
+}
+
+.appVersion {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.createdBy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.githubLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+
+  &:visited {
+    color: var(--text-secondary);
+  }
+
+  &:hover {
+    color: var(--text-primary);
+  }
+}
+
+.githubIcon {
+  width: 16px;
+  height: 16px;
 }
