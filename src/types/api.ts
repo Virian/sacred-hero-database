@@ -128,6 +128,11 @@ export interface BackupCommandParams {
 
 export type BackupCommandResponse = ImportResult;
 
+export interface AssignToSlotCommandParams {
+  slotNumber: number;
+  characterVersionId: string;
+}
+
 export interface RemoveFromSlotCommandParams {
   slotNumber: number;
 }

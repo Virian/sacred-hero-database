@@ -2,15 +2,12 @@ import { useContext, useState } from 'react';
 import { toast } from 'react-toastify';
 import isNil from 'lodash/isNil';
 
-import { CharactersCountContext } from '../../context';
-import { Commands } from '../../enums';
-import { useInvokeMutation } from '../../hooks';
-import type {
-  ActiveCharacter,
-  BackupCommandParams,
-  BackupCommandResponse,
-} from '../../types';
-import { type ImportResult, mapResultImportCommandResponse } from '../../utils';
+import { CharactersCountContext } from '../context';
+import { Commands } from '../enums';
+import type { BackupCommandParams, BackupCommandResponse } from '../types';
+import { type ImportResult, mapResultImportCommandResponse } from '../utils';
+
+import { useInvokeMutation } from '.';
 
 export const useBackup = () => {
   const { refetch: refetchCharactersCount } = useContext(
@@ -32,10 +29,7 @@ export const useBackup = () => {
   });
 
   // Returns true when backed up or already backed up; false when no slot is given or backup fails.
-  const handleBackup = async (
-    _character: ActiveCharacter,
-    slotNumber?: number,
-  ) => {
+  const handleBackup = async (slotNumber?: number, showSuccessToast = true) => {
     if (isNil(slotNumber)) {
       return false;
     }
@@ -45,11 +39,15 @@ export const useBackup = () => {
       const response = await backup({ slotNumber });
       if (response.status === 'success') {
         refetchCharactersCount();
-        toast.success('Character backed up successfully.');
+        if (showSuccessToast) {
+          toast.success('Character backed up successfully.');
+        }
         return true;
       }
       if (response.status === 'skipped') {
-        toast.info('Character is already backed up.');
+        if (showSuccessToast) {
+          toast.info('Character is already backed up.');
+        }
         return true;
       }
       toast.error(`Character backup failed: ${response.message}`);

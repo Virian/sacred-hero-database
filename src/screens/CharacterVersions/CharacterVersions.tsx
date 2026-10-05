@@ -16,7 +16,11 @@ import {
 import { Routes } from '../../constants';
 import { CharactersCountContext } from '../../context';
 import { Commands } from '../../enums';
-import { useInvokeMutation, useInvokeQuery } from '../../hooks';
+import {
+  useAssignToSlot,
+  useInvokeMutation,
+  useInvokeQuery,
+} from '../../hooks';
 import type {
   Character,
   DeleteCharacterVersionCommandParams,
@@ -129,6 +133,9 @@ export const CharacterVersions = () => {
         },
     });
 
+  const { handleAssignToSlot, isLoading: isAssigningToSlot } =
+    useAssignToSlot();
+
   const { invoke: deleteCharacterVersion, isLoading: isDeleteLoading } =
     useInvokeMutation<DeleteCharacterVersionCommandParams>({
       command: Commands.DELETE_CHARACTER_VERSION,
@@ -144,8 +151,19 @@ export const CharacterVersions = () => {
   };
 
   const handleAssign = async (slotIndex: number, isEmptySlot: boolean) => {
-    // TODO
-    console.log({ slotIndex, isEmptySlot });
+    if (!selectedVersion) {
+      return;
+    }
+
+    await handleAssignToSlot({
+      slotNumber: slotIndex + 1,
+      characterVersionId: selectedVersion.id,
+      shouldBackup: !isEmptySlot,
+      onSuccess: () => {
+        setIsAssignModalOpen(false);
+        refetchCharacterVersions();
+      },
+    });
   };
 
   const handleDeleteCharacterVersion = async () => {
@@ -237,6 +255,7 @@ export const CharacterVersions = () => {
           isOpen={isAssignModalOpen}
           onClose={() => setIsAssignModalOpen(false)}
           onAssign={handleAssign}
+          isLoading={isAssigningToSlot}
           character={{
             name: characterData.name,
             level: selectedVersion.level,

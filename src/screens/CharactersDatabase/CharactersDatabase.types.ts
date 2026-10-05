@@ -30,4 +30,4 @@ export type MappedCharacter = Omit<
       | 'playTime'
       | 'modifiedAt'
     >
-  > & { versionCount: number };
+  > & { versionCount: number; versionId?: string };

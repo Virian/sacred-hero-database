@@ -10,10 +10,7 @@ interface CharacterCardProps {
   cardNumber?: number;
   character: Omit<Character, 'version'>;
   isBackupLoading?: boolean;
-  onBackup?: (
-    character: Omit<Character, 'version'>,
-    cardNumber?: number,
-  ) => void;
+  onBackup?: (cardNumber?: number) => void;
   onRemove?: (
     character: Omit<Character, 'version'>,
     cardNumber?: number,
@@ -28,7 +25,7 @@ export const CharacterCard = ({
   onRemove,
 }: CharacterCardProps) => {
   const handleBackup = () => {
-    onBackup?.(character, cardNumber);
+    onBackup?.(cardNumber);
   };
 
   const handleRemove = () => {

@@ -11,6 +11,7 @@ import { CharacterCard } from './Card/CharacterCard';
 import { Overview } from './Overview/Overview';
 
 interface AssignSelectedCharacterModalProps {
+  isLoading?: boolean;
   isOpen: boolean;
   onClose: () => void;
   onAssign: (slotIndex: number, isEmptySlot: boolean) => void;
@@ -26,6 +27,7 @@ interface AssignSelectedCharacterModalProps {
 }
 
 export const AssignSelectedCharacterModal = ({
+  isLoading = false,
   isOpen,
   onClose,
   onAssign,
@@ -111,6 +113,7 @@ export const AssignSelectedCharacterModal = ({
             </Button>
             <Button
               disabled={selectedSlot === null}
+              isLoading={isLoading}
               onClick={handleAssign}
             >
               Assign
