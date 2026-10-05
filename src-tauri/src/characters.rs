@@ -256,6 +256,48 @@ pub async fn backup(
         .ok_or_else(|| "No character to back up.".to_string())
 }
 
+pub async fn assign_to_slot(
+    app: &AppHandle,
+    pool: &sqlx::SqlitePool,
+    state: &app_settings::SettingsState,
+    slot_number: u32,
+    character_version_id: String,
+) -> Result<(), String> {
+    let settings = app_settings::get_settings(state).await?;
+
+    let character_file_index = slot_number
+        .checked_sub(1)
+        .ok_or_else(|| "Slot number must be at least 1.".to_string())?;
+
+    let game_installation_path = settings
+        .get("gameInstallationPath")
+        .and_then(Value::as_str)
+        .ok_or_else(|| "gameInstallationPath must be a string.".to_string())?;
+    let character_save_path = PathBuf::from(game_installation_path)
+        .join("save")
+        .join(format!("Hero{character_file_index:02}.pax"));
+
+    let character_version =
+        character_repository::get_character_version_by_id(pool, &character_version_id)
+            .await
+            .map_err(|error| format!("Could not get character version by id: {error}"))?
+            .ok_or_else(|| format!("Character version {character_version_id} was not found."))?;
+
+    let source_save_file_path = app
+        .path()
+        .app_data_dir()
+        .map_err(|error| error.to_string())?
+        .join("saves")
+        .join(&character_version.character_id)
+        .join(format!("{character_version_id}.pax"));
+
+    tokio::fs::copy(source_save_file_path, character_save_path)
+        .await
+        .map_err(|error| format!("Could not copy character save file: {error}"))?;
+
+    Ok(())
+}
+
 pub async fn remove_from_slot(
     state: &app_settings::SettingsState,
     slot_number: u32,

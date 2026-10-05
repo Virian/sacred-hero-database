@@ -88,6 +88,17 @@ pub async fn backup(
 }
 
 #[tauri::command]
+pub async fn assign_to_slot(
+    app: tauri::AppHandle,
+    pool: tauri::State<'_, sqlx::SqlitePool>,
+    state: tauri::State<'_, app_settings::SettingsState>,
+    slot_number: u32,
+    character_version_id: String,
+) -> Result<(), String> {
+    characters::assign_to_slot(&app, &pool, &state, slot_number, character_version_id).await
+}
+
+#[tauri::command]
 pub async fn remove_from_slot(
     state: tauri::State<'_, app_settings::SettingsState>,
     slot_number: u32,
