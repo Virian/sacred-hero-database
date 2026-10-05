@@ -19,3 +19,15 @@ export interface Settings {
   gameInstallationPath: string;
   activeCharacterSlots: number;
 }
+
+export interface ActiveCharacter {
+  id: string;
+  name: string;
+  characterClass: CharacterClass;
+  level: number;
+  isHardcore: boolean;
+  deathCount: number;
+  survivalBonus: number;
+  playTime: number;
+  modifiedAt: Date;
+}

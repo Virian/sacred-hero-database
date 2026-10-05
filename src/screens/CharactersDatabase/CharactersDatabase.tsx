@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import isNil from 'lodash/isNil';
 
 import {
+  AssignSelectedCharacterModal,
   CharacterOverview,
   CharacterPortrait,
   CharacterTable,
@@ -14,7 +15,11 @@ import {
 import { Routes } from '../../constants';
 import { CharactersCountContext } from '../../context';
 import { CharacterClass, Commands } from '../../enums';
-import { useInvokeMutation, useInvokeQuery } from '../../hooks';
+import {
+  useAssignToSlot,
+  useInvokeMutation,
+  useInvokeQuery,
+} from '../../hooks';
 import type {
   DeleteCharacterCommandParams,
   GetAllCharactersCommandResponse,
@@ -82,6 +87,7 @@ export const CharactersDatabase = () => {
   );
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [selectedCharacter, setSelectedCharacter] =
     useState<MappedCharacter | null>(null);
 
@@ -98,6 +104,7 @@ export const CharactersDatabase = () => {
         name: stripCharacterFormatting(character.name),
         versionCount: character.versions_count,
         version: character.latest_version?.version_number,
+        versionId: character.latest_version?.id,
         level: character.latest_version?.level,
         isHardcore: character.latest_version?.hardcore,
         deathCount: character.latest_version?.deaths,
@@ -108,6 +115,9 @@ export const CharactersDatabase = () => {
           : new Date(character.latest_version.modified_at),
       })),
   });
+
+  const { handleAssignToSlot, isLoading: isAssigningToSlot } =
+    useAssignToSlot();
 
   const { invoke: deleteCharacter, isLoading: isDeleteLoading } =
     useInvokeMutation<DeleteCharacterCommandParams>({
@@ -126,6 +136,23 @@ export const CharactersDatabase = () => {
         id,
       ),
     );
+  };
+
+  const handleAssign = async (slotIndex: number, isEmptySlot: boolean) => {
+    if (!selectedCharacter || !selectedCharacter.versionId) {
+      return;
+    }
+
+    await handleAssignToSlot({
+      slotNumber: slotIndex + 1,
+      characterVersionId: selectedCharacter.versionId,
+      shouldBackup: !isEmptySlot,
+      onSuccess: () => {
+        setIsAssignModalOpen(false);
+        refetchCharacters();
+        refetchCharactersCount();
+      },
+    });
   };
 
   const handleDeleteCharacter = async () => {
@@ -189,7 +216,7 @@ export const CharactersDatabase = () => {
                   level={selectedCharacter.level}
                   levelLabel="Latest Lv"
                   overviewText={`${selectedCharacter.versionCount} version(s)`}
-                  onActivate={() => null}
+                  onActivate={() => setIsAssignModalOpen(true)}
                   onViewVersions={handleViewVersions}
                   onDelete={() => setIsDeleteModalOpen(true)}
                 />
@@ -204,6 +231,23 @@ export const CharactersDatabase = () => {
             </>
           ) : null}
         </div>
+      )}
+      {selectedCharacter && (
+        <AssignSelectedCharacterModal
+          isOpen={isAssignModalOpen}
+          onClose={() => setIsAssignModalOpen(false)}
+          onAssign={handleAssign}
+          isLoading={isAssigningToSlot}
+          character={{
+            name: selectedCharacter.name,
+            level: selectedCharacter.level || 0,
+            characterClass: selectedCharacter.characterClass,
+            isHardcore: selectedCharacter.isHardcore || false,
+            deathCount: selectedCharacter.deathCount || 0,
+            survivalBonus: selectedCharacter.survivalBonus || 0,
+            playTime: selectedCharacter.playTime || 0,
+          }}
+        />
       )}
       <ConfirmModal
         title="Delete character"

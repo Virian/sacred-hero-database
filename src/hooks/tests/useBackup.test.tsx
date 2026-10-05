@@ -1,10 +1,9 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { CharacterClass, Commands } from '../../../enums';
-import type { ImportResult } from '../../../utils';
+import { CharacterClass, Commands } from '../../enums';
+import type { ImportResult } from '../../utils';
 
-import type { ActiveCharacter } from '../Characters.types';
 import { useBackup } from '../useBackup';
 
 const { backupMock, useInvokeMutationMock, toastMock } = vi.hoisted(() => ({
@@ -17,25 +16,13 @@ const { backupMock, useInvokeMutationMock, toastMock } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock('../../../hooks', () => ({
+vi.mock('..', () => ({
   useInvokeMutation: useInvokeMutationMock,
 }));
 
 vi.mock('react-toastify', () => ({
   toast: toastMock,
 }));
-
-const character: ActiveCharacter = {
-  id: '1',
-  name: 'Hero',
-  characterClass: CharacterClass.SERAPHIM,
-  level: 10,
-  isHardcore: false,
-  deathCount: 0,
-  survivalBonus: 2,
-  playTime: 600,
-  modifiedAt: new Date('2026-01-01'),
-};
 
 const renderBackup = (isLoading = false) => {
   useInvokeMutationMock.mockReturnValue({
@@ -57,7 +44,7 @@ describe('useBackup', () => {
 
     // when
     await act(async () => {
-      await result.current.handleBackup(character);
+      await result.current.handleBackup();
     });
 
     // then
@@ -80,7 +67,7 @@ describe('useBackup', () => {
 
     // when
     await act(async () => {
-      await result.current.handleBackup(character, 1);
+      await result.current.handleBackup(1);
     });
 
     // then
@@ -102,7 +89,7 @@ describe('useBackup', () => {
       characterClass: CharacterClass.SERAPHIM,
     } satisfies ImportResult);
     await act(async () => {
-      await result.current.handleBackup(character, 1);
+      await result.current.handleBackup(1);
     });
 
     backupMock.mockResolvedValueOnce({
@@ -111,7 +98,7 @@ describe('useBackup', () => {
       message: 'Character could not be imported.',
     } satisfies ImportResult);
     await act(async () => {
-      await result.current.handleBackup(character, 1);
+      await result.current.handleBackup(1);
     });
 
     // then
@@ -130,7 +117,7 @@ describe('useBackup', () => {
 
     // when
     await act(async () => {
-      await result.current.handleBackup(character, 2);
+      await result.current.handleBackup(2);
     });
 
     // then

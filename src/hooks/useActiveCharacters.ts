@@ -1,12 +1,14 @@
 import { useContext, useMemo } from 'react';
 
-import { SettingsContext } from '../../context';
-import { Commands } from '../../enums';
-import { useInvokeQuery } from '../../hooks';
-import type { GetActiveCharactersCommandResponse } from '../../types';
-import { stripCharacterFormatting } from '../../utils';
+import { SettingsContext } from '../context';
+import { Commands } from '../enums';
+import type {
+  ActiveCharacter,
+  GetActiveCharactersCommandResponse,
+} from '../types';
+import { stripCharacterFormatting } from '../utils';
 
-import type { ActiveCharacter } from './Characters.types';
+import { useInvokeQuery } from '.';
 
 export const useActiveCharacters = () => {
   const {

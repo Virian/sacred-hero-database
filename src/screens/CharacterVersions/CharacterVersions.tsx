@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { ChevronRight } from 'lucide-react';
 
 import {
+  AssignSelectedCharacterModal,
   Button,
   CharacterOverview,
   CharacterTable,
@@ -15,7 +16,11 @@ import {
 import { Routes } from '../../constants';
 import { CharactersCountContext } from '../../context';
 import { Commands } from '../../enums';
-import { useInvokeMutation, useInvokeQuery } from '../../hooks';
+import {
+  useAssignToSlot,
+  useInvokeMutation,
+  useInvokeQuery,
+} from '../../hooks';
 import type {
   Character,
   DeleteCharacterVersionCommandParams,
@@ -91,6 +96,7 @@ export const CharacterVersions = () => {
   );
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [selectedVersion, setSelectedVersion] = useState<CharacterRow | null>(
     null,
   );
@@ -127,6 +133,9 @@ export const CharacterVersions = () => {
         },
     });
 
+  const { handleAssignToSlot, isLoading: isAssigningToSlot } =
+    useAssignToSlot();
+
   const { invoke: deleteCharacterVersion, isLoading: isDeleteLoading } =
     useInvokeMutation<DeleteCharacterVersionCommandParams>({
       command: Commands.DELETE_CHARACTER_VERSION,
@@ -139,6 +148,22 @@ export const CharacterVersions = () => {
       ({ id }) => id === versionId,
     );
     setSelectedVersion(clickedCharacterVersion || null);
+  };
+
+  const handleAssign = async (slotIndex: number, isEmptySlot: boolean) => {
+    if (!selectedVersion) {
+      return;
+    }
+
+    await handleAssignToSlot({
+      slotNumber: slotIndex + 1,
+      characterVersionId: selectedVersion.id,
+      shouldBackup: !isEmptySlot,
+      onSuccess: () => {
+        setIsAssignModalOpen(false);
+        refetchCharacterVersions();
+      },
+    });
   };
 
   const handleDeleteCharacterVersion = async () => {
@@ -209,7 +234,7 @@ export const CharacterVersions = () => {
                   ? 'Latest version'
                   : `Version ${selectedVersion.version}`
               }
-              onActivate={() => null}
+              onActivate={() => setIsAssignModalOpen(true)}
               onDelete={() => setIsDeleteModalOpen(true)}
             />
           )}
@@ -225,6 +250,23 @@ export const CharacterVersions = () => {
       >
         Back
       </Button>
+      {selectedVersion && characterData && (
+        <AssignSelectedCharacterModal
+          isOpen={isAssignModalOpen}
+          onClose={() => setIsAssignModalOpen(false)}
+          onAssign={handleAssign}
+          isLoading={isAssigningToSlot}
+          character={{
+            name: characterData.name,
+            level: selectedVersion.level,
+            characterClass: characterData.characterClass,
+            isHardcore: selectedVersion.isHardcore,
+            deathCount: selectedVersion.deathCount,
+            survivalBonus: selectedVersion.survivalBonus,
+            playTime: selectedVersion.playTime,
+          }}
+        />
+      )}
       <ConfirmModal
         title="Delete character version"
         isOpen={isDeleteModalOpen}

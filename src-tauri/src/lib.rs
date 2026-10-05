@@ -42,6 +42,7 @@ pub fn run() {
             commands::get_character_versions,
             commands::delete_character_version,
             commands::backup,
+            commands::assign_to_slot,
             commands::remove_from_slot,
             commands::import_characters
         ])
