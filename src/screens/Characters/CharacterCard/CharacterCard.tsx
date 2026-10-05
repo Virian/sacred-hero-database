@@ -3,6 +3,7 @@ import { Save, X } from 'lucide-react';
 import { Button, CharacterPortrait, IconButton } from '../../../components';
 import type { Character } from '../../../types';
 import { formatTime } from '../../../utils';
+
 import styles from './CharacterCard.module.scss';
 
 interface CharacterCardProps {

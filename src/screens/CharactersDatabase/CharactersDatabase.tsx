@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import isNil from 'lodash/isNil';
 
 import {
+  AssignSelectedCharacterModal,
   CharacterOverview,
   CharacterPortrait,
   CharacterTable,
@@ -82,6 +83,7 @@ export const CharactersDatabase = () => {
   );
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [selectedCharacter, setSelectedCharacter] =
     useState<MappedCharacter | null>(null);
 
@@ -126,6 +128,11 @@ export const CharactersDatabase = () => {
         id,
       ),
     );
+  };
+
+  const handleAssign = async (slotIndex: number, isEmptySlot: boolean) => {
+    // TODO
+    console.log({ slotIndex, isEmptySlot });
   };
 
   const handleDeleteCharacter = async () => {
@@ -189,7 +196,7 @@ export const CharactersDatabase = () => {
                   level={selectedCharacter.level}
                   levelLabel="Latest Lv"
                   overviewText={`${selectedCharacter.versionCount} version(s)`}
-                  onActivate={() => null}
+                  onActivate={() => setIsAssignModalOpen(true)}
                   onViewVersions={handleViewVersions}
                   onDelete={() => setIsDeleteModalOpen(true)}
                 />
@@ -204,6 +211,22 @@ export const CharactersDatabase = () => {
             </>
           ) : null}
         </div>
+      )}
+      {selectedCharacter && (
+        <AssignSelectedCharacterModal
+          isOpen={isAssignModalOpen}
+          onClose={() => setIsAssignModalOpen(false)}
+          onAssign={handleAssign}
+          character={{
+            name: selectedCharacter.name,
+            level: selectedCharacter.level || 0,
+            characterClass: selectedCharacter.characterClass,
+            isHardcore: selectedCharacter.isHardcore || false,
+            deathCount: selectedCharacter.deathCount || 0,
+            survivalBonus: selectedCharacter.survivalBonus || 0,
+            playTime: selectedCharacter.playTime || 0,
+          }}
+        />
       )}
       <ConfirmModal
         title="Delete character"

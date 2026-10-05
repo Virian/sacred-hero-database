@@ -7,13 +7,12 @@ import { Button, Spinner } from '../../components';
 import { Routes } from '../../constants';
 import { CharactersCountContext, SettingsContext } from '../../context';
 import { Commands } from '../../enums';
-import { useInvokeMutation } from '../../hooks';
+import { useActiveCharacters, useInvokeMutation } from '../../hooks';
 import type { Character, RemoveFromSlotCommandParams } from '../../types';
 
 import styles from './Characters.module.scss';
 import { CharacterCard, EmptyCharacterCard } from './CharacterCard';
 import { ConfirmRemoveModal } from './ConfirmRemoveModal/ConfirmRemoveModal';
-import { useActiveCharacters } from './useActiveCharacters';
 import { useBackup } from './useBackup';
 
 export const Characters = () => {

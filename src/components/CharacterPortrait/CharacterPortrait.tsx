@@ -1,3 +1,5 @@
+import clsx from 'clsx';
+
 import BattleMagePortrait from '../../assets/battle-mage.webp';
 import DaemonPortrait from '../../assets/daemon.webp';
 import DarkElfPortrait from '../../assets/dark-elf.webp';
@@ -23,14 +25,16 @@ const characterPortraitsMap: Record<string, string> = {
 interface CharacterPortraitProps {
   characterClass: CharacterClass;
   size?: number;
+  className?: string;
 }
 
 export const CharacterPortrait = ({
   characterClass,
   size = 56,
+  className = '',
 }: CharacterPortraitProps) => (
   <div
-    className={styles.portraitWrapper}
+    className={clsx(styles.portraitWrapper, className)}
     style={{ width: size, height: size }}
   >
     <img

@@ -5,10 +5,12 @@ import isNil from 'lodash/isNil';
 import { CharactersCountContext } from '../../context';
 import { Commands } from '../../enums';
 import { useInvokeMutation } from '../../hooks';
-import type { BackupCommandParams, BackupCommandResponse } from '../../types';
+import type {
+  ActiveCharacter,
+  BackupCommandParams,
+  BackupCommandResponse,
+} from '../../types';
 import { type ImportResult, mapResultImportCommandResponse } from '../../utils';
-
-import type { ActiveCharacter } from './Characters.types';
 
 export const useBackup = () => {
   const { refetch: refetchCharactersCount } = useContext(

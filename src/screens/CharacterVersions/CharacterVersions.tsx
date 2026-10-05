@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { ChevronRight } from 'lucide-react';
 
 import {
+  AssignSelectedCharacterModal,
   Button,
   CharacterOverview,
   CharacterTable,
@@ -91,6 +92,7 @@ export const CharacterVersions = () => {
   );
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [selectedVersion, setSelectedVersion] = useState<CharacterRow | null>(
     null,
   );
@@ -139,6 +141,11 @@ export const CharacterVersions = () => {
       ({ id }) => id === versionId,
     );
     setSelectedVersion(clickedCharacterVersion || null);
+  };
+
+  const handleAssign = async (slotIndex: number, isEmptySlot: boolean) => {
+    // TODO
+    console.log({ slotIndex, isEmptySlot });
   };
 
   const handleDeleteCharacterVersion = async () => {
@@ -209,7 +216,7 @@ export const CharacterVersions = () => {
                   ? 'Latest version'
                   : `Version ${selectedVersion.version}`
               }
-              onActivate={() => null}
+              onActivate={() => setIsAssignModalOpen(true)}
               onDelete={() => setIsDeleteModalOpen(true)}
             />
           )}
@@ -225,6 +232,22 @@ export const CharacterVersions = () => {
       >
         Back
       </Button>
+      {selectedVersion && characterData && (
+        <AssignSelectedCharacterModal
+          isOpen={isAssignModalOpen}
+          onClose={() => setIsAssignModalOpen(false)}
+          onAssign={handleAssign}
+          character={{
+            name: characterData.name,
+            level: selectedVersion.level,
+            characterClass: characterData.characterClass,
+            isHardcore: selectedVersion.isHardcore,
+            deathCount: selectedVersion.deathCount,
+            survivalBonus: selectedVersion.survivalBonus,
+            playTime: selectedVersion.playTime,
+          }}
+        />
+      )}
       <ConfirmModal
         title="Delete character version"
         isOpen={isDeleteModalOpen}

@@ -3,8 +3,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { CharacterClass, Commands } from '../../../enums';
 import type { ImportResult } from '../../../utils';
+import type { ActiveCharacter } from '../../../types';
 
-import type { ActiveCharacter } from '../Characters.types';
 import { useBackup } from '../useBackup';
 
 const { backupMock, useInvokeMutationMock, toastMock } = vi.hoisted(() => ({

@@ -1,4 +1,5 @@
 import { type MouseEvent, type ReactNode, useEffect, useRef } from 'react';
+import clsx from 'clsx';
 import { X } from 'lucide-react';
 
 import styles from './Modal.module.scss';
@@ -8,9 +9,18 @@ interface ModalProps {
   onClose: () => void;
   title?: string;
   children: ReactNode;
+  className?: string;
+  contentClassName?: string;
 }
 
-export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
+export const Modal = ({
+  isOpen,
+  onClose,
+  title,
+  children,
+  className = '',
+  contentClassName = '',
+}: ModalProps) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -36,10 +46,10 @@ export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
   return (
     <dialog
       ref={dialogRef}
-      className={styles.dialog}
+      className={clsx(styles.dialog, className)}
       onClick={handleClick}
     >
-      <div className={styles.content}>
+      <div className={clsx(styles.content, contentClassName)}>
         {title && (
           <div className={styles.header}>
             <h2 className={styles.title}>{title}</h2>

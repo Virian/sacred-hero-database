@@ -2,16 +2,18 @@ import { renderHook } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { SettingsContext } from '../../../context';
-import { CharacterClass, Commands } from '../../../enums';
-import type { GetActiveCharactersCommandResponse } from '../../../types';
+import { SettingsContext } from '../../context';
+import { CharacterClass, Commands } from '../../enums';
+import type {
+  ActiveCharacter,
+  GetActiveCharactersCommandResponse,
+} from '../../types';
 
-import type { ActiveCharacter } from '../Characters.types';
 import { useActiveCharacters } from '../useActiveCharacters';
 
 const useInvokeQueryMock = vi.hoisted(() => vi.fn());
 
-vi.mock('../../../hooks', () => ({
+vi.mock('../../hooks', () => ({
   useInvokeQuery: useInvokeQueryMock,
 }));
 
