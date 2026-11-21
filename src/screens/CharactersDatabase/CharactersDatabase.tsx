@@ -1,7 +1,6 @@
 import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
-import isNil from 'lodash/isNil';
 
 import {
   AssignSelectedCharacterModal,
@@ -16,18 +15,15 @@ import { Routes } from '../../constants';
 import { CharactersCountContext } from '../../context';
 import { CharacterClass, Commands } from '../../enums';
 import {
+  type MappedCharacter,
+  useAllCharacters,
   useAssignToSlot,
   useInvokeMutation,
-  useInvokeQuery,
 } from '../../hooks';
-import type {
-  DeleteCharacterCommandParams,
-  GetAllCharactersCommandResponse,
-} from '../../types';
-import { stripCharacterFormatting } from '../../utils';
+import type { DeleteCharacterCommandParams } from '../../types';
 
 import { CharacterDetails } from './CharacterDetails/CharacterDetails';
-import type { CharacterRow, MappedCharacter } from './CharactersDatabase.types';
+import type { CharacterRow } from './CharactersDatabase.types';
 import styles from './CharactersDatabase.module.scss';
 
 const portraitColumn: ColumnDefinition<CharacterRow, CharacterClass> = {
@@ -95,26 +91,7 @@ export const CharactersDatabase = () => {
     data: characters,
     isLoading,
     refetch: refetchCharacters,
-  } = useInvokeQuery<GetAllCharactersCommandResponse, MappedCharacter[]>({
-    command: Commands.GET_ALL_CHARACTERS,
-    mapper: (data) =>
-      data.map((character) => ({
-        id: character.id,
-        characterClass: character.class,
-        name: stripCharacterFormatting(character.name),
-        versionCount: character.versions_count,
-        version: character.latest_version?.version_number,
-        versionId: character.latest_version?.id,
-        level: character.latest_version?.level,
-        isHardcore: character.latest_version?.hardcore,
-        deathCount: character.latest_version?.deaths,
-        survivalBonus: character.latest_version?.survival_bonus,
-        playTime: character.latest_version?.play_time_seconds,
-        modifiedAt: isNil(character.latest_version?.modified_at)
-          ? undefined
-          : new Date(character.latest_version.modified_at),
-      })),
-  });
+  } = useAllCharacters();
 
   const { handleAssignToSlot, isLoading: isAssigningToSlot } =
     useAssignToSlot();

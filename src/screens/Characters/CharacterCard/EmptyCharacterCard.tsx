@@ -2,17 +2,17 @@ import { CirclePlus } from 'lucide-react';
 import styles from './EmptyCharacterCard.module.scss';
 
 interface EmptyCharacterCardProps {
-  cardNumber?: number;
-  onClick?: () => void;
+  cardNumber: number;
+  onClick?: (cardNumber: number) => void;
 }
 
 export const EmptyCharacterCard = ({
   cardNumber,
-  onClick,
+  onClick = () => {},
 }: EmptyCharacterCardProps) => (
   <div
     className={styles.card}
-    onClick={onClick}
+    onClick={() => onClick(cardNumber)}
   >
     <div className={styles.content}>
       <span className={styles.cardNumber}>{cardNumber}</span>

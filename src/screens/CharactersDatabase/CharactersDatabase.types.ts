@@ -1,5 +1,4 @@
 import type { CharacterClass } from '../../enums';
-import type { Character } from '../../types';
 
 export interface CharacterRow {
   id: string;
@@ -8,26 +7,3 @@ export interface CharacterRow {
   level?: number;
   versionCount: number;
 }
-
-export type MappedCharacter = Omit<
-  Character,
-  | 'version'
-  | 'level'
-  | 'isHardcore'
-  | 'deathCount'
-  | 'survivalBonus'
-  | 'playTime'
-  | 'modifiedAt'
-> &
-  Partial<
-    Pick<
-      Character,
-      | 'version'
-      | 'level'
-      | 'isHardcore'
-      | 'deathCount'
-      | 'survivalBonus'
-      | 'playTime'
-      | 'modifiedAt'
-    >
-  > & { versionCount: number; versionId?: string };
