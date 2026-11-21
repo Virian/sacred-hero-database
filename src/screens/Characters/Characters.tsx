@@ -2,17 +2,25 @@ import { useContext, useState } from 'react';
 import { Link } from 'react-router';
 import { toast } from 'react-toastify';
 import { CircleX, RefreshCw } from 'lucide-react';
+import isNil from 'lodash/isNil';
 
 import { Button, Spinner } from '../../components';
 import { Routes } from '../../constants';
 import { CharactersCountContext, SettingsContext } from '../../context';
 import { Commands } from '../../enums';
-import { useActiveCharacters, useBackup, useInvokeMutation } from '../../hooks';
+import {
+  useActiveCharacters,
+  useAllCharacters,
+  useAssignToSlot,
+  useBackup,
+  useInvokeMutation,
+} from '../../hooks';
 import type { Character, RemoveFromSlotCommandParams } from '../../types';
 
 import styles from './Characters.module.scss';
 import { CharacterCard, EmptyCharacterCard } from './CharacterCard';
 import { ConfirmRemoveModal } from './ConfirmRemoveModal/ConfirmRemoveModal';
+import { AssignCharacterToEmptySlotModal } from './AssignCharacterToEmptySlotModal/AssignCharacterToEmptySlotModal';
 
 export const Characters = () => {
   const {
@@ -22,12 +30,17 @@ export const Characters = () => {
     CharactersCountContext,
   );
 
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [slotToAssign, setSlotToAssign] = useState<number | null>(null);
   const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false);
   const [characterToRemove, setCharacterToRemove] = useState<{
     character: Omit<Character, 'version'>;
     slotNumber: number;
   } | null>(null);
   const [isRemoveFromSlotLoading, setIsRemoveFromSlotLoading] = useState(false);
+
+  const { data: allCharacters, isLoading: isLoadingAllCharacters } =
+    useAllCharacters();
 
   const { invoke: removeFromSlotCommand } =
     useInvokeMutation<RemoveFromSlotCommandParams>({
@@ -37,8 +50,8 @@ export const Characters = () => {
   const {
     activeCharacters,
     refetch: refetchActiveCharacters,
-    isLoading: isLoadingCharacters,
-    isFetching: isFetchingCharacters,
+    isLoading: isLoadingActiveCharacters,
+    isFetching: isFetchingActiveCharacters,
   } = useActiveCharacters();
 
   const {
@@ -46,6 +59,14 @@ export const Characters = () => {
     isLoading: isBackupLoading,
     handleBackup,
   } = useBackup();
+
+  const { handleAssignToSlot, isLoading: isAssigningToSlot } =
+    useAssignToSlot();
+
+  const handleEmptyCardClick = (cardNumber: number) => {
+    setIsAssignModalOpen(true);
+    setSlotToAssign(cardNumber);
+  };
 
   const handleCardRemove = (
     character: Omit<Character, 'version'>,
@@ -96,6 +117,22 @@ export const Characters = () => {
     }
   };
 
+  const handleAssign = async (characterVersionId?: string) => {
+    if (isNil(slotToAssign) || !characterVersionId) {
+      return;
+    }
+
+    await handleAssignToSlot({
+      slotNumber: slotToAssign,
+      characterVersionId: characterVersionId,
+      shouldBackup: false,
+      onSuccess: () => {
+        setIsAssignModalOpen(false);
+        refetchActiveCharacters();
+      },
+    });
+  };
+
   const renderContent = () => {
     if (!gameInstallationPath) {
       return (
@@ -119,7 +156,7 @@ export const Characters = () => {
       );
     }
 
-    if (isLoadingCharacters) {
+    if (isLoadingActiveCharacters) {
       return (
         <div className={styles.spinnerContainer}>
           <Spinner />
@@ -146,6 +183,7 @@ export const Characters = () => {
               <EmptyCharacterCard
                 key={index + 1}
                 cardNumber={index + 1}
+                onClick={handleEmptyCardClick}
               />
             ),
           )}
@@ -153,7 +191,7 @@ export const Characters = () => {
         <div className={styles.actions}>
           <Button
             variant="secondary"
-            isLoading={isFetchingCharacters}
+            isLoading={isFetchingActiveCharacters}
             onClick={() => refetchActiveCharacters()}
           >
             <span className={styles.buttonText}>
@@ -162,6 +200,14 @@ export const Characters = () => {
             </span>
           </Button>
         </div>
+        <AssignCharacterToEmptySlotModal
+          isOpen={isAssignModalOpen}
+          onClose={() => setIsAssignModalOpen(false)}
+          characters={allCharacters || []}
+          isLoadingCharacters={isLoadingAllCharacters}
+          isLoading={isAssigningToSlot}
+          onAssign={handleAssign}
+        />
         <ConfirmRemoveModal
           isOpen={isRemoveModalOpen}
           onClose={() => setIsRemoveModalOpen(false)}
