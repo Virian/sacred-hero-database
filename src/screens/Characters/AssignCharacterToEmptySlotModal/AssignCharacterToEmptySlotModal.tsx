@@ -6,6 +6,7 @@ import type { MappedCharacter } from '../../../hooks';
 
 import styles from './AssignCharacterToEmptySlotModal.module.scss';
 import { CharacterRow } from './CharacterRow';
+import { filterCharactersByPhrase } from './filterCharactersByPhrase';
 
 interface AssignCharacterToEmptySlotModalProps {
   isLoading?: boolean;
@@ -55,27 +56,11 @@ export const AssignCharacterToEmptySlotModal = ({
 
   const filterCharacters = useCallback(
     (phrase: string) => {
-      const normalizedPhrase = phrase.trim().toLocaleLowerCase();
-
-      if (!normalizedPhrase) {
-        setFilteredCharacters(characters);
-        return;
-      }
-
-      const results = characters.filter(
-        (character) =>
-          character.name.toLocaleLowerCase().includes(normalizedPhrase) ||
-          character.characterClass
-            .toLocaleLowerCase()
-            .includes(normalizedPhrase),
-      );
-
-      if (
-        selectedCharacter &&
-        !results.some((character) => character.id === selectedCharacter.id)
-      ) {
-        results.push(selectedCharacter);
-      }
+      const results = filterCharactersByPhrase({
+        phrase,
+        characters,
+        selectedCharacter,
+      });
 
       setFilteredCharacters(results);
     },
