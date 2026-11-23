@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { invoke as tauriInvoke, type InvokeArgs } from '@tauri-apps/api/core';
+import { error as logError } from '@tauri-apps/plugin-log';
 
 import type { Commands } from '../enums';
 
@@ -29,6 +30,7 @@ export const useInvokeMutation = <
         return mapper ? mapper(response) : (response as TMappedData);
       } catch (error) {
         console.error(error);
+        logError(`Error invoking mutation ${command}: ${error}`);
         throw error;
       } finally {
         setIsLoading(false);

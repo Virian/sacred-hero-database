@@ -1,6 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { relaunch } from '@tauri-apps/plugin-process';
+import { error as logError } from '@tauri-apps/plugin-log';
 
 import { Button } from '../Button/Button';
 import { ErrorState } from '../ErrorState/ErrorState';
@@ -34,6 +35,11 @@ export class ErrorBoundary extends Component<
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('Unhandled application error', error, errorInfo);
+    logError('Unhandled application error');
+    logError(error.toString());
+    if (errorInfo.componentStack) {
+      logError(errorInfo.componentStack);
+    }
   }
 
   handleRestart = async () => {

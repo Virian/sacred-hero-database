@@ -11,12 +11,33 @@ use tauri::Manager;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(
+            tauri_plugin_log::Builder::new()
+                .clear_targets()
+                .targets([
+                    tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::LogDir {
+                        file_name: None,
+                    })
+                    .filter(|metadata| metadata.level() <= tauri_plugin_log::log::Level::Info),
+                    tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Stdout)
+                        .filter(|metadata| metadata.target() != "sqlx::query"),
+                ])
+                .level(tauri_plugin_log::log::LevelFilter::Trace)
+                .max_file_size(5_000_000)
+                .rotation_strategy(tauri_plugin_log::RotationStrategy::KeepSome(4))
+                .build(),
+        )
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_process::init())
         .manage(app_settings::SettingsState::default())
         .setup(|app| {
+            tauri_plugin_log::log::info!("Application starting up");
+
             let database = tauri::async_runtime::block_on(database::initialize(app.handle()))
-                .expect("failed to initialize database");
+                .map_err(|error| {
+                    tauri_plugin_log::log::error!("Failed to initialize database: {error}");
+                    std::io::Error::other(error)
+                })?;
             app.manage(database);
 
             let settings_state = app.state::<app_settings::SettingsState>();
@@ -25,7 +46,7 @@ pub fn run() {
                 app.handle(),
                 &settings_state,
             )) {
-                eprintln!("Failed to initialize settings: {error}");
+                tauri_plugin_log::log::error!("Failed to initialize settings: {error}");
             }
 
             Ok(())
@@ -47,5 +68,8 @@ pub fn run() {
             commands::import_characters
         ])
         .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .unwrap_or_else(|error| {
+            tauri_plugin_log::log::error!("Error while running Tauri application: {error}");
+            panic!("error while running tauri application: {error}");
+        });
 }

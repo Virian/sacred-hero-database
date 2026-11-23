@@ -30,6 +30,7 @@ sqlx = { version = "0.9", features = ["runtime-tokio", "sqlite", "migrate"] }
 uuid = { version = "1", features = ["v4"] }
 tauri-plugin-dialog = "2"
 tauri-plugin-process = "2"
+tauri-plugin-log = "2"
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.56"

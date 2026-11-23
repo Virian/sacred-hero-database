@@ -12,6 +12,10 @@ vi.mock('@tauri-apps/api/core', () => ({
   invoke: tauriInvokeMock,
 }));
 
+vi.mock('@tauri-apps/plugin-log', () => ({
+  error: vi.fn(),
+}));
+
 describe('useInvokeQuery', () => {
   afterEach(() => {
     tauriInvokeMock.mockReset();
