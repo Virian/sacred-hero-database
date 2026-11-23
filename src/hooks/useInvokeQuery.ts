@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { invoke as tauriInvoke, type InvokeArgs } from '@tauri-apps/api/core';
+import { error as logError } from '@tauri-apps/plugin-log';
 
 import type { Commands } from '../enums';
 
@@ -39,6 +40,7 @@ export const useInvokeQuery = <
       setData(response);
     } catch (error) {
       console.error(error);
+      logError(`Error invoking query ${command}: ${error}`);
       setError(error);
     } finally {
       setHasFetched(true);
