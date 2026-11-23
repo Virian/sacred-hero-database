@@ -1,0 +1,109 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      source_tag:
+        description: Existing version tag to build and release, for example v1.2.3
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.workflow }}-${{ inputs.source_tag || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-latest
+            target: x86_64-pc-windows-msvc
+            bundle: msi
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.source_tag && format('refs/tags/{0}', inputs.source_tag) || github.ref }}
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Set app version
+        shell: pwsh
+        env:
+          SOURCE_TAG: ${{ inputs.source_tag || github.ref_name }}
+        run: |
+          $tag = $env:SOURCE_TAG
+          $versionPattern = '^v(?<version>(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?)$'
+
+          if ($tag -notmatch $versionPattern) {
+            throw "Release tag '$tag' must be a semantic version such as v1.2.3."
+          }
+          $version = $Matches.version
+
+          $configPath = Join-Path $env:RUNNER_TEMP 'tauri-version.json'
+          [ordered]@{ version = $version } |
+            ConvertTo-Json -Compress |
+            Set-Content -Path $configPath -Encoding utf8 -NoNewline
+          "TAURI_VERSION_CONFIG=$configPath" >> $env:GITHUB_ENV
+
+      - name: Build MSI
+        shell: pwsh
+        run: pnpm tauri build --target ${{ matrix.target }} --bundles ${{ matrix.bundle }} --config "$env:TAURI_VERSION_CONFIG"
+
+      - name: Upload MSI and app executable
+        uses: actions/upload-artifact@v6
+        with:
+          name: downloads-${{ matrix.target }}
+          path: |
+            src-tauri/target/${{ matrix.target }}/release/bundle/${{ matrix.bundle }}/*.msi
+            src-tauri/target/${{ matrix.target }}/release/*.exe
+          if-no-files-found: error
+
+  draft-release:
+    name: Create draft GitHub release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download installers
+        uses: actions/download-artifact@v6
+        with:
+          pattern: downloads-*
+          path: release-assets
+          merge-multiple: true
+
+      - name: Create draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.source_tag || github.ref_name }}
+          name: Sacred Hero Database ${{ inputs.source_tag || github.ref_name }}
+          draft: true
+          files: |
+            release-assets/**/*.msi
+            release-assets/**/*.exe
+          fail_on_unmatched_files: true
