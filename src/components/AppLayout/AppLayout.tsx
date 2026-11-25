@@ -1,9 +1,10 @@
 import { useContext } from 'react';
-import { Outlet } from 'react-router';
+import { Link, Outlet } from 'react-router';
 import {
   Users,
   BookUser,
   Download,
+  Info,
   Settings as SettingsIcon,
   TriangleAlert,
 } from 'lucide-react';
@@ -12,7 +13,7 @@ import { Tooltip } from 'react-tooltip';
 import { Badge, Menu, MenuOption, SettingsError, Spinner } from '../';
 import { Routes } from '../../constants';
 import { CharactersCountContext, SettingsContext } from '../../context';
-import { useAppVersion } from '../../hooks';
+import { useAppVersion, useUpdateService } from '../../hooks';
 
 import styles from './AppLayout.module.scss';
 
@@ -20,6 +21,7 @@ export const AppLayout = () => {
   const { settings, isInitialized, initializationError } =
     useContext(SettingsContext);
   const { charactersCount } = useContext(CharactersCountContext);
+  const { availableUpdate, isDownloading } = useUpdateService();
 
   const appVersion = useAppVersion();
 
@@ -34,6 +36,41 @@ export const AppLayout = () => {
       charactersCount > 999 ? '999+' : charactersCount;
 
     return <Badge>{charactersCountFormatted}</Badge>;
+  };
+
+  const renderUpdateIndicator = () => {
+    if (isDownloading) {
+      return (
+        <div
+          className={styles.updateDownloading}
+          data-tooltip-id="update-status"
+          data-tooltip-content="Downloading update."
+          data-tooltip-place="top"
+        >
+          <Spinner
+            size="small"
+            label="Downloading update"
+          />
+        </div>
+      );
+    }
+
+    if (!availableUpdate) {
+      return null;
+    }
+
+    return (
+      <Link
+        to={`/${Routes.SETTINGS}`}
+        className={styles.updateAvailable}
+        aria-label="A new update is available. Go to Settings to install it."
+        data-tooltip-id="update-status"
+        data-tooltip-content="A new update is available. Go to Settings to install it."
+        data-tooltip-place="top"
+      >
+        <Info size={16} />
+      </Link>
+    );
   };
 
   if (!isInitialized) {
@@ -86,12 +123,18 @@ export const AppLayout = () => {
             }
           />
         </Menu>
-        {appVersion && <span className={styles.appVersion}>v{appVersion}</span>}
+        {appVersion && (
+          <div className={styles.appVersionContainer}>
+            <span className={styles.appVersion}>v{appVersion}</span>
+            {renderUpdateIndicator()}
+          </div>
+        )}
       </nav>
       <main className={styles.main}>
         <Outlet />
       </main>
       <Tooltip id="settings-warning" />
+      <Tooltip id="update-status" />
     </div>
   );
 };

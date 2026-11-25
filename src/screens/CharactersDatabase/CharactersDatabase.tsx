@@ -21,6 +21,7 @@ import {
   useInvokeMutation,
 } from '../../hooks';
 import type { DeleteCharacterCommandParams } from '../../types';
+import { getErrorMessage } from '../../utils';
 
 import { CharacterDetails } from './CharacterDetails/CharacterDetails';
 import type { CharacterRow } from './CharactersDatabase.types';
@@ -148,8 +149,7 @@ export const CharactersDatabase = () => {
       refetchCharacters();
       refetchCharactersCount();
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
+      const errorMessage = getErrorMessage(error);
       toast.error(
         `Failed to delete "${selectedCharacter.name}": ${errorMessage}`,
       );

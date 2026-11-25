@@ -4,6 +4,7 @@ import { RefreshCw } from 'lucide-react';
 
 import { Button } from '../Button/Button';
 import { ErrorState } from '../ErrorState/ErrorState';
+import { getErrorMessage } from '../../utils';
 
 import styles from './SettingsError.module.scss';
 
@@ -18,7 +19,7 @@ export const SettingsError = ({ errorMessage }: SettingsErrorProps) => {
     try {
       await relaunch();
     } catch (error) {
-      setRestartError(error instanceof Error ? error.message : String(error));
+      setRestartError(getErrorMessage(error));
     }
   };
 

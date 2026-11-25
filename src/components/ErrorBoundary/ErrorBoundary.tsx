@@ -5,6 +5,7 @@ import { error as logError } from '@tauri-apps/plugin-log';
 
 import { Button } from '../Button/Button';
 import { ErrorState } from '../ErrorState/ErrorState';
+import { getErrorMessage } from '../../utils';
 
 import styles from './ErrorBoundary.module.scss';
 
@@ -16,9 +17,6 @@ interface ErrorBoundaryState {
   error: Error | null;
   restartError: string | null;
 }
-
-const getErrorMessage = (error: unknown) =>
-  error instanceof Error ? error.message : String(error);
 
 export class ErrorBoundary extends Component<
   ErrorBoundaryProps,

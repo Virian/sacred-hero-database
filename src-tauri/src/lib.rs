@@ -20,8 +20,12 @@ pub fn run() {
                         file_name: None,
                     })
                     .filter(|metadata| metadata.level() <= tauri_plugin_log::log::Level::Info),
-                    tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Stdout)
-                        .filter(|metadata| metadata.target() != "sqlx::query"),
+                    tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Stdout).filter(
+                        |metadata| {
+                            metadata.target() != "sqlx::query"
+                                && metadata.level() != tauri_plugin_log::log::Level::Trace
+                        },
+                    ),
                 ])
                 .level(tauri_plugin_log::log::LevelFilter::Trace)
                 .max_file_size(5_000_000)

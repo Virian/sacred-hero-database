@@ -16,6 +16,7 @@ import {
   useInvokeMutation,
 } from '../../hooks';
 import type { Character, RemoveFromSlotCommandParams } from '../../types';
+import { getErrorMessage } from '../../utils';
 
 import styles from './Characters.module.scss';
 import { CharacterCard, EmptyCharacterCard } from './CharacterCard';
@@ -107,8 +108,7 @@ export const Characters = () => {
       refetchActiveCharacters();
       refetchCharactersCount();
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
+      const errorMessage = getErrorMessage(error);
       toast.error(
         `Removing "${characterToRemove.character.name}" from slot ${characterToRemove.slotNumber} failed: ${errorMessage}`,
       );

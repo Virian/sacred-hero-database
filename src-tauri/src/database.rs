@@ -11,6 +11,8 @@ pub async fn initialize(app: &AppHandle) -> Result<SqlitePool, String> {
         .map_err(|error| error.to_string())?;
 
     let database_path = app_data_dir.join("database.sqlite");
+    // TODO: remove later
+    tauri_plugin_log::log::info!("Opening database at {}", database_path.display());
     let options = SqliteConnectOptions::new()
         .filename(database_path)
         .create_if_missing(true)

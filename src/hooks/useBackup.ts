@@ -5,7 +5,11 @@ import isNil from 'lodash/isNil';
 import { CharactersCountContext } from '../context';
 import { Commands } from '../enums';
 import type { BackupCommandParams, BackupCommandResponse } from '../types';
-import { type ImportResult, mapResultImportCommandResponse } from '../utils';
+import {
+  getErrorMessage,
+  type ImportResult,
+  mapResultImportCommandResponse,
+} from '../utils';
 
 import { useInvokeMutation } from '.';
 
@@ -53,8 +57,7 @@ export const useBackup = () => {
       toast.error(`Character backup failed: ${response.message}`);
       return false;
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
+      const errorMessage = getErrorMessage(error);
       toast.error(`Character backup failed: ${errorMessage}`);
       return false;
     } finally {

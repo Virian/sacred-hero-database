@@ -29,6 +29,7 @@ import type {
   GetCharacterVersionsCommandParams,
   GetCharacterVersionsCommandResponse,
 } from '../../types';
+import { getErrorMessage } from '../../utils';
 import { stripCharacterFormatting } from '../../utils';
 
 import styles from './CharacterVersions.module.scss';
@@ -186,8 +187,7 @@ export const CharacterVersions = () => {
         refetchCharacterVersions();
       }
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
+      const errorMessage = getErrorMessage(error);
       toast.error(
         `Failed to delete version ${selectedVersion.id}: ${errorMessage}`,
       );
