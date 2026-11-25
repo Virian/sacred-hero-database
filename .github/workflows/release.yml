@@ -53,15 +53,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Validate updater signing key
-        shell: pwsh
-        env:
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-        run: |
-          if ([string]::IsNullOrWhiteSpace($env:TAURI_SIGNING_PRIVATE_KEY)) {
-            throw 'The TAURI_SIGNING_PRIVATE_KEY repository secret is required to generate updater signatures.'
-          }
-
       - name: Set app version
         id: version
         shell: pwsh
@@ -89,7 +80,6 @@ jobs:
           releaseName: ${{ inputs.source_tag || github.ref_name }}
           releaseDraft: true
           uploadUpdaterJson: true
-          uploadUpdaterSignatures: true
           args: >-
             --target ${{ matrix.target }}
             --bundles ${{ matrix.bundle }}
