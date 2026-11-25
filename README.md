@@ -81,6 +81,26 @@ game-save/database operations are implemented in Rust with Tauri and SQLite.
 Frontend code and tests are under `src/`; Rust code and its tests are under
 `src-tauri/`. The frontend calls the Rust backend through Tauri commands.
 
+### Database migrations
+
+SQLx embeds the migrations in `src-tauri/migrations/` into each build and
+records a checksum when applying each migration. If a later build has different
+bytes for an already-applied migration, startup fails with an error such as
+`migration 0 was previously applied but has been modified`.
+
+The checksum includes line endings: LF and CRLF versions of otherwise identical
+SQL are different. Git checkout settings such as `core.autocrlf` can therefore
+make a local Windows build embed different migration bytes from a CI or release
+build. The release workflow runs on Windows, so verify the actual checked-out
+line endings when diagnosing a checksum mismatch. Keep migration bytes
+consistent across builds that may open the same database, including with
+previously published releases.
+
+Once a migration has shipped, do not edit it; add a new migration for schema
+changes. If startup reports a checksum mismatch, verify which database file was
+opened and compare the migration bytes used by each build. Do not delete the
+database as a routine fix, since it may contain user data.
+
 ### Tests and checks
 
 Run the frontend unit tests once:
