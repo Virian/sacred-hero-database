@@ -53,7 +53,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Validate updater signing key
+        shell: pwsh
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:TAURI_SIGNING_PRIVATE_KEY)) {
+            throw 'The TAURI_SIGNING_PRIVATE_KEY repository secret is required to generate updater signatures.'
+          }
+
       - name: Set app version
+        id: version
         shell: pwsh
         env:
           SOURCE_TAG: ${{ inputs.source_tag || github.ref_name }}
@@ -66,11 +76,7 @@ jobs:
           }
           $version = $Matches.version
 
-          $configPath = Join-Path $env:RUNNER_TEMP 'tauri-version.json'
-          [ordered]@{ version = $version } |
-            ConvertTo-Json -Compress |
-            Set-Content -Path $configPath -Encoding utf8 -NoNewline
-          "TAURI_VERSION_CONFIG=$configPath" >> $env:GITHUB_ENV
+          "version=$version" >> $env:GITHUB_OUTPUT
 
       - name: Build and publish draft release
         uses: tauri-apps/tauri-action@v1
@@ -83,7 +89,8 @@ jobs:
           releaseName: ${{ inputs.source_tag || github.ref_name }}
           releaseDraft: true
           uploadUpdaterJson: true
+          uploadUpdaterSignatures: true
           args: >-
             --target ${{ matrix.target }}
             --bundles ${{ matrix.bundle }}
-            --config ${{ runner.temp }}/tauri-version.json
+            --config '{"version":"${{ steps.version.outputs.version }}"}'
