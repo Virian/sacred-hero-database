@@ -15,6 +15,7 @@ interface SettingsProviderProps {
 const defaultSettings: Settings = {
   gameInstallationPath: '',
   activeCharacterSlots: CharacterSlots.UNDERWORLD,
+  shouldDownloadAppUpdates: true,
 };
 
 export const SettingsProvider = ({ children }: SettingsProviderProps) => {
@@ -23,9 +24,14 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     Settings
   >({
     command: Commands.GET_SETTINGS,
-    mapper: ({ gameInstallationPath, activeCharacterSlots }) => ({
+    mapper: ({
       gameInstallationPath,
       activeCharacterSlots,
+      shouldDownloadAppUpdates,
+    }) => ({
+      gameInstallationPath,
+      activeCharacterSlots,
+      shouldDownloadAppUpdates,
     }),
   });
 

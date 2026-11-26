@@ -18,6 +18,7 @@ export interface Character {
 export interface Settings {
   gameInstallationPath: string;
   activeCharacterSlots: number;
+  shouldDownloadAppUpdates: boolean;
 }
 
 export interface ActiveCharacter {

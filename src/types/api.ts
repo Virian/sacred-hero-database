@@ -1,12 +1,14 @@
 export interface GetSettingsCommandResponse {
   gameInstallationPath: string;
   activeCharacterSlots: number;
+  shouldDownloadAppUpdates: boolean;
   triedDetectingGamePath: boolean;
 }
 
 export interface UpdateSettingsCommandParams {
   gameInstallationPath: string;
   activeCharacterSlots: number;
+  shouldDownloadAppUpdates: boolean;
 }
 
 type CharacterClass =
