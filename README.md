@@ -69,7 +69,7 @@ add save files, and **Database** to manage your saved characters and versions.
 ### Prerequisites
 
 - Node.js 24 and Corepack.
-- pnpm 10.34.5, as pinned in `package.json`.
+- pnpm 12.21.0, as pinned in `package.json`.
 - The stable Rust toolchain.
 - The [Tauri prerequisites for your operating system](https://v2.tauri.app/start/prerequisites/).
 
