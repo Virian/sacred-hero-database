@@ -47,6 +47,7 @@ const renderSettings = () => {
         settings: {
           gameInstallationPath: 'C:\\Game',
           activeCharacterSlots: CharacterSlots.UNDERWORLD,
+          shouldDownloadAppUpdates: true,
         },
         fetchSettings: vi.fn(),
         isInitialized: true,
@@ -88,7 +89,7 @@ describe('Settings', () => {
     });
   });
 
-  it('does not show the update section when no update is available', () => {
+  it('does not show install actions when no update is available', () => {
     // given
     updateServiceMock.mockReturnValue({
       availableUpdate: null,
@@ -99,7 +100,14 @@ describe('Settings', () => {
     renderSettings();
 
     // then
-    expect(screen.queryByText('Application update')).toBeNull();
+    expect(screen.getByText('Application update')).toBeTruthy();
+    expect(
+      screen.getByLabelText('Automatically download application updates'),
+    ).toBeTruthy();
+    expect(screen.queryByText('Version 2.0.0 is ready to install.')).toBeNull();
+    expect(
+      screen.queryByRole('button', { name: 'Install and restart' }),
+    ).toBeNull();
   });
 
   it('shows an error when installing the update fails', async () => {
