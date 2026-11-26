@@ -34,6 +34,20 @@ are separate from the game's active save files; deleting a character from the
 database deletes its saved versions there, while removing a character from a
 slot affects the game's save file.
 
+## Download and update the app
+
+The app is currently distributed for 64-bit Windows. Open the
+[latest GitHub release](https://github.com/Virian/sacred-hero-database/releases/latest)
+and download the `.msi` installer from its **Assets**. Run the installer and
+follow its prompts. The `.sig` and `latest.json` files are updater metadata,
+not installers.
+
+When the app starts, it checks for updates and automatically downloads one if
+available. It does not install updates without your confirmation. Once an
+update is ready, an information icon appears next to the app version; open
+**Settings** and choose **Install and restart** to install it and relaunch the
+app. An internet connection is required to check for and download updates.
+
 ## Settings and getting started
 
 1. Open **Settings** and set **Game installation path** to the Sacred game
