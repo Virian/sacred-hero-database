@@ -1,4 +1,5 @@
 export { AppLayout } from './AppLayout/AppLayout';
+export { AppInitializer } from './AppInitializer/AppInitializer';
 export { AssignSelectedCharacterModal } from './AssignSelectedCharacterModal/AssignSelectedCharacterModal';
 export { Badge } from './Badge/Badge';
 export { Button } from './Button/Button';

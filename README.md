@@ -34,6 +34,20 @@ are separate from the game's active save files; deleting a character from the
 database deletes its saved versions there, while removing a character from a
 slot affects the game's save file.
 
+## Download and update the app
+
+The app is currently distributed for 64-bit Windows. Open the
+[latest GitHub release](https://github.com/Virian/sacred-hero-database/releases/latest)
+and download the `.msi` installer from its **Assets**. Run the installer and
+follow its prompts. The `.sig` and `latest.json` files are updater metadata,
+not installers.
+
+When the app starts, it checks for updates and automatically downloads one if
+available. It does not install updates without your confirmation. Once an
+update is ready, an information icon appears next to the app version; open
+**Settings** and choose **Install and restart** to install it and relaunch the
+app. An internet connection is required to check for and download updates.
+
 ## Settings and getting started
 
 1. Open **Settings** and set **Game installation path** to the Sacred game
@@ -80,6 +94,26 @@ The UI is built with React, TypeScript, and Vite. The desktop shell and
 game-save/database operations are implemented in Rust with Tauri and SQLite.
 Frontend code and tests are under `src/`; Rust code and its tests are under
 `src-tauri/`. The frontend calls the Rust backend through Tauri commands.
+
+### Database migrations
+
+SQLx embeds the migrations in `src-tauri/migrations/` into each build and
+records a checksum when applying each migration. If a later build has different
+bytes for an already-applied migration, startup fails with an error such as
+`migration 0 was previously applied but has been modified`.
+
+The checksum includes line endings: LF and CRLF versions of otherwise identical
+SQL are different. Git checkout settings such as `core.autocrlf` can therefore
+make a local Windows build embed different migration bytes from a CI or release
+build. The release workflow runs on Windows, so verify the actual checked-out
+line endings when diagnosing a checksum mismatch. Keep migration bytes
+consistent across builds that may open the same database, including with
+previously published releases.
+
+Once a migration has shipped, do not edit it; add a new migration for schema
+changes. If startup reports a checksum mismatch, verify which database file was
+opened and compare the migration bytes used by each build. Do not delete the
+database as a routine fix, since it may contain user data.
 
 ### Tests and checks
 

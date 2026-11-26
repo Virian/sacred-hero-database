@@ -19,8 +19,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
-    name: Build ${{ matrix.target }}
+  publish:
+    name: Build and publish ${{ matrix.target }}
     runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
@@ -54,6 +54,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Set app version
+        id: version
         shell: pwsh
         env:
           SOURCE_TAG: ${{ inputs.source_tag || github.ref_name }}
@@ -66,44 +67,20 @@ jobs:
           }
           $version = $Matches.version
 
-          $configPath = Join-Path $env:RUNNER_TEMP 'tauri-version.json'
-          [ordered]@{ version = $version } |
-            ConvertTo-Json -Compress |
-            Set-Content -Path $configPath -Encoding utf8 -NoNewline
-          "TAURI_VERSION_CONFIG=$configPath" >> $env:GITHUB_ENV
+          "version=$version" >> $env:GITHUB_OUTPUT
 
-      - name: Build MSI
-        shell: pwsh
-        run: pnpm tauri build --target ${{ matrix.target }} --bundles ${{ matrix.bundle }} --config "$env:TAURI_VERSION_CONFIG"
-
-      - name: Upload MSI and app executable
-        uses: actions/upload-artifact@v7
+      - name: Build and publish draft release
+        uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
-          name: downloads-${{ matrix.target }}
-          path: |
-            src-tauri/target/${{ matrix.target }}/release/bundle/${{ matrix.bundle }}/*.msi
-            src-tauri/target/${{ matrix.target }}/release/*.exe
-          if-no-files-found: error
-
-  draft-release:
-    name: Create draft GitHub release
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download installers
-        uses: actions/download-artifact@v8
-        with:
-          pattern: downloads-*
-          path: release-assets
-          merge-multiple: true
-
-      - name: Create draft release
-        uses: softprops/action-gh-release@v3
-        with:
-          tag_name: ${{ inputs.source_tag || github.ref_name }}
-          name: ${{ inputs.source_tag || github.ref_name }}
-          draft: true
-          files: |
-            release-assets/**/*.msi
-            release-assets/**/*.exe
-          fail_on_unmatched_files: true
+          tagName: ${{ inputs.source_tag || github.ref_name }}
+          releaseName: ${{ inputs.source_tag || github.ref_name }}
+          releaseDraft: true
+          uploadUpdaterJson: true
+          args: >-
+            --target ${{ matrix.target }}
+            --bundles ${{ matrix.bundle }}
+            --config '{"version":"${{ steps.version.outputs.version }}"}'

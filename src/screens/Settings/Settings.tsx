@@ -1,16 +1,23 @@
-import { useContext, useMemo } from 'react';
+import { useContext, useMemo, useState } from 'react';
+import clsx from 'clsx';
 import { Formik, type FormikHelpers } from 'formik';
-import { X, Save } from 'lucide-react';
+import { Download, X, Save } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { open } from '@tauri-apps/plugin-dialog';
+import { error as logError } from '@tauri-apps/plugin-log';
 import { openUrl } from '@tauri-apps/plugin-opener';
 
 import GithubIcon from '../../assets/github.svg?react';
 import { Button, Input, RadioGroup } from '../../components';
 import { SettingsContext } from '../../context';
 import { Commands } from '../../enums';
-import { useAppVersion, useInvokeMutation } from '../../hooks';
+import {
+  useAppVersion,
+  useInvokeMutation,
+  useUpdateService,
+} from '../../hooks';
 import type { UpdateSettingsCommandParams } from '../../types';
+import { getErrorMessage } from '../../utils';
 
 import { validate } from './validate';
 import { characterSlotsOptions } from './Settings.constants';
@@ -19,6 +26,8 @@ import styles from './Settings.module.scss';
 
 export const Settings = () => {
   const { settings, fetchSettings } = useContext(SettingsContext);
+  const { availableUpdate, installDownloadedUpdate } = useUpdateService();
+  const [isInstallingUpdate, setIsInstallingUpdate] = useState(false);
 
   const appVersion = useAppVersion();
 
@@ -64,6 +73,20 @@ export const Settings = () => {
 
   const openGithubPage = () => {
     openUrl('https://github.com/Virian/sacred-hero-database');
+  };
+
+  const installUpdate = async () => {
+    setIsInstallingUpdate(true);
+
+    try {
+      await installDownloadedUpdate();
+    } catch (error) {
+      const message = getErrorMessage(error);
+      logError(`Failed to install update: ${message}`);
+      toast.error(`Failed to install update: ${message}`);
+    } finally {
+      setIsInstallingUpdate(false);
+    }
   };
 
   return (
@@ -155,6 +178,24 @@ export const Settings = () => {
               this setting.
             </p>
           </div>
+          {availableUpdate && (
+            <div className={styles.section}>
+              <h2 className={styles.sectionTitle}>Application update</h2>
+              <span className={styles.appVersion}>
+                Version {availableUpdate.version} is ready to install.
+              </span>
+              <Button
+                className={clsx(styles.button, styles.installUpdateButton)}
+                onClick={installUpdate}
+                isLoading={isInstallingUpdate}
+              >
+                <span className={styles.buttonText}>
+                  <Download size={16} />
+                  Install and restart
+                </span>
+              </Button>
+            </div>
+          )}
           <div className={styles.section}>
             <h2 className={styles.sectionTitle}>About</h2>
             <span className={styles.appName}>Sacred Hero Database</span>

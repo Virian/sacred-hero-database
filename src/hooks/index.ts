@@ -5,3 +5,4 @@ export { useAssignToSlot } from './useAssignToSlot';
 export { useBackup } from './useBackup';
 export { useInvokeMutation } from './useInvokeMutation';
 export { useInvokeQuery } from './useInvokeQuery';
+export { useUpdateService } from './useUpdateService';

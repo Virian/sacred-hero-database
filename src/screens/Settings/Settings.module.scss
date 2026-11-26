@@ -68,6 +68,10 @@
   color: var(--text-secondary);
 }
 
+.installUpdateButton {
+  align-self: flex-start;
+}
+
 .appName {
   font-size: 0.875rem;
 }

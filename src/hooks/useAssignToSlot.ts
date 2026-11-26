@@ -3,6 +3,7 @@ import { toast } from 'react-toastify';
 
 import { Commands } from '../enums';
 import type { AssignToSlotCommandParams } from '../types';
+import { getErrorMessage } from '../utils';
 
 import { useBackup, useInvokeMutation } from '.';
 
@@ -42,8 +43,7 @@ export const useAssignToSlot = () => {
       toast.success(`Character assigned to slot ${slotNumber} successfully.`);
       onSuccess?.();
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
+      const errorMessage = getErrorMessage(error);
       toast.error(`Assigning to slot ${slotNumber} failed: ${errorMessage}`);
     } finally {
       setIsLoading(false);
