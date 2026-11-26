@@ -8,11 +8,15 @@ import { useUpdateService } from '../../hooks';
 import { getErrorMessage } from '../../utils';
 
 export const AppInitializer = () => {
-  const { isInitialized } = useContext(SettingsContext);
+  const {
+    settings: { shouldDownloadAppUpdates },
+    isInitialized,
+  } = useContext(SettingsContext);
   const { checkAndDownloadUpdate } = useUpdateService();
 
+  // This also runs when the setting changes, so enabling updates later starts a check.
   useEffect(() => {
-    if (!isInitialized || isDevMode) {
+    if (!isInitialized || isDevMode || !shouldDownloadAppUpdates) {
       return;
     }
 
@@ -43,7 +47,7 @@ export const AppInitializer = () => {
     return () => {
       isMounted = false;
     };
-  }, [checkAndDownloadUpdate, isInitialized]);
+  }, [checkAndDownloadUpdate, isInitialized, shouldDownloadAppUpdates]);
 
   return null;
 };

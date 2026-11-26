@@ -62,6 +62,7 @@ describe('AppInitializer', () => {
           settings: {
             gameInstallationPath: '',
             activeCharacterSlots: 0,
+            shouldDownloadAppUpdates: true,
           },
           fetchSettings: vi.fn(),
           isInitialized: true,
@@ -87,6 +88,7 @@ describe('AppInitializer', () => {
           settings: {
             gameInstallationPath: '',
             activeCharacterSlots: 0,
+            shouldDownloadAppUpdates: true,
           },
           fetchSettings: vi.fn(),
           isInitialized: false,
@@ -107,6 +109,7 @@ describe('AppInitializer', () => {
           settings: {
             gameInstallationPath: '',
             activeCharacterSlots: 0,
+            shouldDownloadAppUpdates: true,
           },
           fetchSettings: vi.fn(),
           isInitialized: true,
@@ -123,6 +126,29 @@ describe('AppInitializer', () => {
     });
   });
 
+  it('skips update checks when automatic updates are disabled', () => {
+    // when
+    render(
+      <SettingsContext.Provider
+        value={{
+          settings: {
+            gameInstallationPath: '',
+            activeCharacterSlots: 0,
+            shouldDownloadAppUpdates: false,
+          },
+          fetchSettings: vi.fn(),
+          isInitialized: true,
+          initializationError: null,
+        }}
+      >
+        <AppInitializer />
+      </SettingsContext.Provider>,
+    );
+
+    // then
+    expect(checkAndDownloadUpdateMock).not.toHaveBeenCalled();
+  });
+
   it('notifies the user after an update has downloaded', async () => {
     // given
     checkAndDownloadUpdateMock.mockResolvedValue({ version: '1.2.3' });
@@ -134,6 +160,7 @@ describe('AppInitializer', () => {
           settings: {
             gameInstallationPath: '',
             activeCharacterSlots: 0,
+            shouldDownloadAppUpdates: true,
           },
           fetchSettings: vi.fn(),
           isInitialized: true,
