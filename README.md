@@ -43,10 +43,12 @@ follow its prompts. The `.sig` and `latest.json` files are updater metadata,
 not installers.
 
 When the app starts, it checks for updates and automatically downloads one if
-available. It does not install updates without your confirmation. Once an
-update is ready, an information icon appears next to the app version; open
-**Settings** and choose **Install and restart** to install it and relaunch the
-app. An internet connection is required to check for and download updates.
+available. To disable automatic update checks and downloads, open **Settings**
+and clear **Automatically download application updates**. The app does not
+install updates without your confirmation. Once an update is ready, an
+information icon appears next to the app version; open **Settings** and choose
+**Install and restart** to install it and relaunch the app. An internet
+connection is required to check for and download updates.
 
 ## Settings and getting started
 
@@ -57,7 +59,10 @@ app. An internet connection is required to check for and download updates.
 2. Choose **Active character slots**:
    - **8 slots (Sacred Underworld)** when using Underworld.
    - **6 slots (Sacred Plus Compatibility)** when using Sacred Plus.
-3. Choose **Save**. Use **Cancel** to discard unsaved changes.
+3. Choose whether to enable **Automatically download application updates**.
+   This is on by default; turn it off to disable automatic update checks and
+   downloads.
+4. Choose **Save**. Use **Cancel** to discard unsaved changes.
 
 The slot setting controls how many active game slots the app displays and
 manages. It does not limit the number of characters or versions in your
