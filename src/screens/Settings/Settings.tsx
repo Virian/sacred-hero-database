@@ -8,7 +8,7 @@ import { error as logError } from '@tauri-apps/plugin-log';
 import { openUrl } from '@tauri-apps/plugin-opener';
 
 import GithubIcon from '../../assets/github.svg?react';
-import { Button, Input, RadioGroup } from '../../components';
+import { Button, Checkbox, Input, RadioGroup } from '../../components';
 import { SettingsContext } from '../../context';
 import { Commands } from '../../enums';
 import {
@@ -40,8 +40,13 @@ export const Settings = () => {
     () => ({
       installationPath: settings.gameInstallationPath,
       activeCharacterSlots: `${settings.activeCharacterSlots}`,
+      shouldDownloadAppUpdates: settings.shouldDownloadAppUpdates,
     }),
-    [settings.gameInstallationPath, settings.activeCharacterSlots],
+    [
+      settings.gameInstallationPath,
+      settings.activeCharacterSlots,
+      settings.shouldDownloadAppUpdates,
+    ],
   );
 
   const saveSettings = async (values: FormValues) => {
@@ -49,6 +54,7 @@ export const Settings = () => {
       await updateSettings({
         gameInstallationPath: values.installationPath,
         activeCharacterSlots: parseInt(values.activeCharacterSlots),
+        shouldDownloadAppUpdates: values.shouldDownloadAppUpdates,
       });
       await fetchSettings();
       toast.success('Settings saved successfully.');
@@ -178,24 +184,33 @@ export const Settings = () => {
               this setting.
             </p>
           </div>
-          {availableUpdate && (
-            <div className={styles.section}>
-              <h2 className={styles.sectionTitle}>Application update</h2>
-              <span className={styles.appVersion}>
-                Version {availableUpdate.version} is ready to install.
-              </span>
-              <Button
-                className={clsx(styles.button, styles.installUpdateButton)}
-                onClick={installUpdate}
-                isLoading={isInstallingUpdate}
-              >
-                <span className={styles.buttonText}>
-                  <Download size={16} />
-                  Install and restart
+          <div className={styles.section}>
+            <h2 className={styles.sectionTitle}>Application update</h2>
+            <Checkbox
+              name="shouldDownloadAppUpdates"
+              label="Automatically download application updates"
+              checked={values.shouldDownloadAppUpdates}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            {availableUpdate && (
+              <>
+                <span className={styles.appVersion}>
+                  Version {availableUpdate.version} is ready to install.
                 </span>
-              </Button>
-            </div>
-          )}
+                <Button
+                  className={clsx(styles.button, styles.installUpdateButton)}
+                  onClick={installUpdate}
+                  isLoading={isInstallingUpdate}
+                >
+                  <span className={styles.buttonText}>
+                    <Download size={16} />
+                    Install and restart
+                  </span>
+                </Button>
+              </>
+            )}
+          </div>
           <div className={styles.section}>
             <h2 className={styles.sectionTitle}>About</h2>
             <span className={styles.appName}>Sacred Hero Database</span>

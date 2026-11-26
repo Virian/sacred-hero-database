@@ -52,6 +52,7 @@ pub async fn update_settings(
     state: &SettingsState,
     game_installation_path: String,
     active_character_slots: u32,
+    should_download_app_updates: bool,
 ) -> Result<(), String> {
     let mut cached_settings = state.settings.lock().await;
     let settings = match cached_settings.as_ref() {
@@ -60,8 +61,12 @@ pub async fn update_settings(
         None => return Err("Settings have not been initialized.".to_string()),
     };
 
-    let updated_settings =
-        update_settings_value(settings, game_installation_path, active_character_slots)?;
+    let updated_settings = update_settings_value(
+        settings,
+        game_installation_path,
+        active_character_slots,
+        should_download_app_updates,
+    )?;
 
     let contents =
         serde_json::to_string_pretty(&updated_settings).map_err(|error| error.to_string())?;
@@ -133,6 +138,9 @@ fn apply_defaults(mut settings: Value) -> Result<Value, String> {
     settings_object
         .entry("triedDetectingGamePath")
         .or_insert_with(|| Value::Bool(false));
+    settings_object
+        .entry("shouldDownloadAppUpdates")
+        .or_insert_with(|| Value::Bool(true));
 
     Ok(settings)
 }
@@ -141,6 +149,7 @@ fn update_settings_value(
     mut settings: Value,
     game_installation_path: String,
     active_character_slots: u32,
+    should_download_app_updates: bool,
 ) -> Result<Value, String> {
     let settings_object = settings
         .as_object_mut()
@@ -153,6 +162,10 @@ fn update_settings_value(
     settings_object.insert(
         "activeCharacterSlots".to_string(),
         Value::from(active_character_slots),
+    );
+    settings_object.insert(
+        "shouldDownloadAppUpdates".to_string(),
+        Value::Bool(should_download_app_updates),
     );
 
     Ok(settings)
